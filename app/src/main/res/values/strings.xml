@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">Deja Vu</string>
+    <string name="title_activity_settings">Settings</string>
+
+    <!-- Strings related to Settings -->
+
+    <!-- Example General settings -->
+
+    <!-- Example settings for Data & Sync -->
+
+    <!-- Example settings for Notifications -->
+
+    <string name="pref_ringtone_silent">Silent</string>
+    <string name="title_activity_authentication_success">authenticationSuccess</string>
+
+</resources>
