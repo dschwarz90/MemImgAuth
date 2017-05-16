@@ -25,6 +25,9 @@ import org.json.JSONException;
 
 import java.util.ArrayList;
 
+/**
+ * This is the main class with the start screen
+ */
 public class MainActivity extends AppCompatActivity {
 
     Button button;
