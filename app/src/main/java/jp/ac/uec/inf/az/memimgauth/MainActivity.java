@@ -124,8 +124,8 @@ public class MainActivity extends AppCompatActivity {
             for (int i = 0; i < clipData.getItemCount(); i++) {
                 imageList.add(clipData.getItemAt(i).getUri().toString());
             }
+            setStringArrayPref(getApplicationContext(), "passImages", imageList);
         }
-        setStringArrayPref(getApplicationContext(), "passImages", imageList);
     }
 
     /**
