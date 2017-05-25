@@ -12,6 +12,7 @@ import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.util.TimingLogger;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -34,6 +35,7 @@ public class authenticate extends AppCompatActivity {
     private HashSet<Uri> passImages;
     private Statistics statistics = Statistics.getInstance();
     int authenticationTries = 1;
+    private String photoFolderName = "/";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,18 +50,22 @@ public class authenticate extends AppCompatActivity {
         //receive all the pass images
         imageList = b.getStringArrayList("passImages");
         if(imageList.size() > 0){
-
-            ArrayList<Image> thumbnails = new ArrayList<>();
-            timings.addSplit("getCameraImages()");
-            ArrayList<Uri> cameraImages = getCameraImages(getApplicationContext());
-            int numberOfDecoyImagesToDisplay = Integer.parseInt(getValueFromSharedPref("numberOfDecoyImages"));
-            int numberOfPassImagesToDisplay = Integer.parseInt(getValueFromSharedPref("numberOfDisplayedPassImages"));
-            timings.addSplit("pickRandomElements(cameraImages)");
-            List<Uri> decoyImagesToDisplay = pickRandomElements(cameraImages, numberOfDecoyImagesToDisplay);
             ArrayList<Uri> imageListAsUri = new ArrayList<>(imageList.size());
             for (Object object : imageList) {
                 imageListAsUri.add(Uri.parse(Objects.toString(object, null)));
             }
+            //receiving the folder name of the first pass image (pass images can only originate from the same folder)
+            photoFolderName = Environment.getExternalStorageDirectory().toString()+
+                    getPhotofolderName(getApplicationContext(), imageListAsUri.get(0));
+
+            ArrayList<Image> thumbnails = new ArrayList<>();
+            timings.addSplit("getCameraImages()");
+            ArrayList<Uri> cameraImages = getCameraImages(getApplicationContext());
+            Log.d("cameraImages Size", ""+cameraImages.size());
+            int numberOfDecoyImagesToDisplay = Integer.parseInt(getValueFromSharedPref("numberOfDecoyImages"));
+            int numberOfPassImagesToDisplay = Integer.parseInt(getValueFromSharedPref("numberOfDisplayedPassImages"));
+            timings.addSplit("pickRandomElements(cameraImages)");
+            List<Uri> decoyImagesToDisplay = pickRandomElements(cameraImages, numberOfDecoyImagesToDisplay);
             //preparing the image set for display
             timings.addSplit("pickRandomElements(imageListAsUri)");
             List<Uri> imagesToDisplay = pickRandomElements(imageListAsUri, numberOfPassImagesToDisplay);
@@ -119,7 +125,8 @@ public class authenticate extends AppCompatActivity {
                 MediaStore.Images.Media.DATA
         };
         final String selection = MediaStore.Images.Media.BUCKET_ID + " = ?";
-        final String[] selectionArgs = { CAMERA_IMAGE_BUCKET_ID };
+        Log.d("Path", photoFolderName);
+        final String[] selectionArgs = { getBucketId(photoFolderName) };
         final Cursor cursor = context.getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
                 projection,
                 selection,
@@ -136,26 +143,18 @@ public class authenticate extends AppCompatActivity {
             } while (cursor.moveToNext());
         }
         cursor.close();
-/*        for (int i = 0; i < result.size(); i++){
-        }*/
         return result;
     }
-
-    public static final String CAMERA_IMAGE_BUCKET_NAME =
-            Environment.getExternalStorageDirectory().toString()
-                    + "/DCIM/Camera";
-    public static final String CAMERA_IMAGE_BUCKET_ID =
-            getBucketId(CAMERA_IMAGE_BUCKET_NAME);
 
     /**
      * Matches code in MediaProvider.computeBucketValues. Should be a common
      * function.
      */
-    public static String getBucketId(String path) {
+    public String getBucketId(String path) {
         return String.valueOf(path.toLowerCase().hashCode());
     }
 
-    public static List<Uri> pickRandomElements(ArrayList<Uri> lst, int n) {
+    public List<Uri> pickRandomElements(ArrayList<Uri> lst, int n) {
         List<Uri> copy = new ArrayList<>(lst);
         Collections.shuffle(copy);
 
@@ -203,6 +202,25 @@ public class authenticate extends AppCompatActivity {
                 return false;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    //finds the path of selected pass images.
+    public String getPhotofolderName(Context context, Uri uri)
+    {
+        String path = "";
+        Cursor cursor = context.getContentResolver().query(uri, null, null,
+                null, null);
+        if (cursor.moveToFirst())
+        {
+            int column_index =
+                    cursor .getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+            Uri filePathUri = Uri.parse(cursor .getString(column_index));
+            List<String>  pathsegments = filePathUri.getPathSegments();
+            path= "/"+pathsegments.get(pathsegments.size()-3)+"/"; //DCIM or custom folder
+            path+= pathsegments.get(pathsegments.size()-2); // subfolder
+
+        }
+        return path;
     }
 
 }
