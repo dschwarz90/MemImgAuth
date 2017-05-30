@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -92,12 +93,20 @@ public class authenticate extends AppCompatActivity {
                     Image selectedImage = (Image) gridView.getItemAtPosition(position);
                     selectedImage.toggleChecked();
                     if(selectedImage.isChecked()){
+                        //change bg color
+                        if(selectedPassImages.isEmpty()){
+                            gridView.getChildAt(position).setBackgroundColor(Color.RED);
+                        }
+                        else{
+                            gridView.getChildAt(position).setBackgroundColor(Color.BLACK);
+                        }
                         selectedPassImages.add(selectedImage.getImageUri());
                     }
                     else{
                         if(selectedPassImages.contains(selectedImage.getImageUri())){
                             selectedPassImages.remove(selectedImage.getImageUri());
                         }
+                        gridView.getChildAt(position).setBackgroundColor(Color.TRANSPARENT);
                     }
                     gridAdapter.notifyDataSetChanged();
                 }
@@ -136,11 +145,12 @@ public class authenticate extends AppCompatActivity {
         ArrayList<Uri> result = new ArrayList<>(cursor.getCount());
         if (cursor.moveToFirst()) {
             do {
-                Uri data= ContentUris
-                                .withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                                        cursor.getInt(cursor.getColumnIndex(MediaStore.Images.ImageColumns._ID)));
+                Uri data = ContentUris
+                        .withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                                cursor.getInt(cursor.getColumnIndex(MediaStore.Images.ImageColumns._ID)));
                 result.add(data);
-            } while (cursor.moveToNext());
+            }
+            while (cursor.moveToNext());
         }
         cursor.close();
         return result;

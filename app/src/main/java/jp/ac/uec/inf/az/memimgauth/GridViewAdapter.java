@@ -2,7 +2,6 @@ package jp.ac.uec.inf.az.memimgauth;
 
 import android.app.Activity;
 import android.content.Context;
-import android.graphics.Color;
 import android.os.AsyncTask;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -65,15 +64,9 @@ public class GridViewAdapter extends ArrayAdapter {
                         .placeholder(R.raw.loading)
                         .error(R.raw.error)
                         .noFade()
-                        .resize(150, 150)
+                        .resize(100, 100)
                         .centerCrop()
                         .into(iv);
-                if(result.isChecked()){
-                    row.setBackgroundColor(Color.BLACK);
-                }
-                else {
-                    row.setBackgroundColor(Color.TRANSPARENT);
-                }
             }
         }.execute();
     }
