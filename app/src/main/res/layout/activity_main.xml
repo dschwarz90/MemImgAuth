@@ -47,11 +47,20 @@
                 android:layout_marginTop="50dp" />
 
             <Button
-                android:text="Authenticate!"
+            android:text="Authenticate!"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/authenticateButton"
+            android:layout_below="@+id/showPassImagesButton"
+            android:layout_alignParentStart="true"
+            android:layout_marginTop="50dp" />
+
+            <Button
+                android:text="Show Users"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:id="@+id/authenticateButton"
-                android:layout_below="@+id/showPassImagesButton"
+                android:id="@+id/showUsersButton"
+                android:layout_below="@+id/authenticateButton"
                 android:layout_alignParentStart="true"
                 android:layout_marginTop="50dp" />
 

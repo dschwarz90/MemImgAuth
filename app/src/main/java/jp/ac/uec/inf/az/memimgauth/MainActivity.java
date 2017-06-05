@@ -54,6 +54,15 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        Button showUsers = (Button) findViewById(R.id.showUsersButton);
+        showUsers.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getApplicationContext(), SelectUsers.class);
+                startActivity(intent);
+            }
+        });
+
         showPassImages = (Button)findViewById(R.id.showPassImagesButton);
         showPassImages.setOnClickListener(new View.OnClickListener() {
             @Override

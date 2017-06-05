@@ -10,7 +10,7 @@
         android:label="MemImgAuth"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name="jp.ac.uec.inf.az.memimgauth.MainActivity">
+        <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -18,14 +18,18 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="jp.ac.uec.inf.az.memimgauth.SettingsActivity"
+            android:name=".SettingsActivity"
             android:label="@string/title_activity_settings" />
-        <activity android:name="jp.ac.uec.inf.az.memimgauth.showPassImages" />
-        <activity android:name="jp.ac.uec.inf.az.memimgauth.authenticate" />
+        <activity android:name=".showPassImages" />
+        <activity android:name=".authenticate" />
         <activity
-            android:name="jp.ac.uec.inf.az.memimgauth.authenticationSuccess"
+            android:name=".authenticationSuccess"
             android:label="Success!"
             android:logo="@mipmap/ic_launcher"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".SelectUsers"
+            android:label="@string/title_activity_select_users"
             android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
