@@ -17,16 +17,13 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
-            <EditText
-                android:id="@+id/username"
-                android:layout_width="match_parent"
+
+            <TextView
+                android:id="@+id/userName"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:contentDescription="Please set the user name"
-                android:ems="10"
-                android:inputType="textPersonName"
-                android:text=""
-                android:layout_below="@+id/textView"
-                android:layout_alignParentStart="true" />
+                android:textSize="25dp"
+                android:text="Welcome, " />
 
             <Button
                 android:text="Select Pass Images"
@@ -55,22 +52,6 @@
             android:layout_alignParentStart="true"
             android:layout_marginTop="50dp" />
 
-            <Button
-                android:text="Show Users"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/showUsersButton"
-                android:layout_below="@+id/authenticateButton"
-                android:layout_alignParentStart="true"
-                android:layout_marginTop="50dp" />
-
-            <TextView
-                android:id="@+id/textView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentStart="true"
-                android:text="Username"
-                android:layout_alignParentTop="true" />
         </RelativeLayout>
 
     </ScrollView>

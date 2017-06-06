@@ -12,6 +12,6 @@
 
     <string name="pref_ringtone_silent">Silent</string>
     <string name="title_activity_authentication_success">authenticationSuccess</string>
-    <string name="title_activity_select_users">SelectUsers</string>
+    <string name="title_activity_select_users">Login</string>
 
 </resources>

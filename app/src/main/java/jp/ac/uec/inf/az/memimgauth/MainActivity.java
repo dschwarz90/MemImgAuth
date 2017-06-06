@@ -18,7 +18,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
+import android.widget.TextView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -33,33 +33,34 @@ public class MainActivity extends AppCompatActivity {
     Button button;
     Button showPassImages;
     Button authenticate;
-    EditText username;
+    int userId = 0;
     private static final int PICK_IMAGE = 100;
     ArrayList<String> imageList;
-
+    private DatabaseConnection dbConnection;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        userId = getIntent().getIntExtra("userId", 0);
+        dbConnection = new DatabaseConnection(this);
+        dbConnection.open();
 
-        username = (EditText)findViewById(R.id.username);
+        TextView username = (TextView) findViewById(R.id.userName);
+        if(userId > 0){
+            username.append(dbConnection.getUserForId(userId).getName());
+        }
+        else {
+            username.setText("You are not logged in!");
+        }
 
         button = (Button)findViewById(R.id.selectPassImagesButton);
-
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                openGallery();
-            }
-        });
-
-        Button showUsers = (Button) findViewById(R.id.showUsersButton);
-        showUsers.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(getApplicationContext(), SelectUsers.class);
-                startActivity(intent);
+                if(userId > 0) {
+                    openGallery();
+                }
             }
         });
 
@@ -67,10 +68,11 @@ public class MainActivity extends AppCompatActivity {
         showPassImages.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getApplicationContext(), showPassImages.class);
-                final ArrayList<String> arr = getStringArrayPref(getApplicationContext(), "passImages");
-                intent.putExtra("passImages", arr);
-                startActivity(intent);
+            Intent intent = new Intent(getApplicationContext(), showPassImages.class);
+            final ArrayList<String> arr = getStringArrayPref(getApplicationContext(), "passImages");
+                getPassImagesForUser();
+            intent.putExtra("passImages", arr);
+            startActivity(intent);
             }
         });
 
@@ -78,17 +80,17 @@ public class MainActivity extends AppCompatActivity {
         authenticate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(username.getText().length() > 0) {
-                    Intent intent = new Intent(getApplicationContext(), authenticate.class);
-                    ArrayList<String> selectedPassImages = getStringArrayPref(getApplicationContext(), "passImages");
-                    final ArrayList<String> passImagesToDisplay = selectedPassImages;
-                    Log.d("pass images len", ""+selectedPassImages.size());
-                    intent.putExtra("passImages", passImagesToDisplay);
-                    startActivity(intent);
-                }
-                else{
-                    Snackbar.make(findViewById(R.id.activity_main),"Please set a user name!", Snackbar.LENGTH_LONG).show();
-                }
+            if(userId > 0) {
+                Intent intent = new Intent(getApplicationContext(), authenticate.class);
+                ArrayList<String> selectedPassImages = getStringArrayPref(getApplicationContext(), "passImages");
+                final ArrayList<String> passImagesToDisplay = selectedPassImages;
+                Log.d("pass images len", ""+selectedPassImages.size());
+                intent.putExtra("passImages", passImagesToDisplay);
+                startActivity(intent);
+            }
+            else{
+                Snackbar.make(findViewById(R.id.activity_main),"Please set a user name!", Snackbar.LENGTH_LONG).show();
+            }
             }
         });
 
@@ -133,7 +135,8 @@ public class MainActivity extends AppCompatActivity {
             for (int i = 0; i < clipData.getItemCount(); i++) {
                 imageList.add(clipData.getItemAt(i).getUri().toString());
             }
-            setStringArrayPref(getApplicationContext(), "passImages", imageList);
+            //setStringArrayPref(getApplicationContext(), "passImages", imageList);
+            setPassImagesForUser(imageList);
         }
     }
 
@@ -174,6 +177,14 @@ public class MainActivity extends AppCompatActivity {
         editor.commit();
     }
 
+    private boolean setPassImagesForUser(ArrayList<String> values){
+        JSONArray a = new JSONArray();
+        for (int i = 0; i < values.size(); i++) {
+            a.put(values.get(i).toString());
+        }
+        return dbConnection.setPassImagesForUser(userId, a.toString());
+    }
+
     /**
      * get string array from SharedPref
      * @param context
@@ -197,6 +208,22 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         return values;
+    }
+
+    private ArrayList<Uri> getPassImagesForUser() {
+        return dbConnection.getPassImagesForUser(userId);
+    }
+
+    @Override
+    protected void onResume() {
+        //dbConnection.open();
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        //dbConnection.close();
+        super.onPause();
     }
 
 }
