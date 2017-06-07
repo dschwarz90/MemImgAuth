@@ -11,8 +11,8 @@ public class Image {
     private Uri imageUri;
     boolean isChecked = false;
 
-    public Image(String uri) {
-        this.imageUri = Uri.parse(uri);
+    public Image(Uri uri) {
+        this.imageUri = uri;
     }
 
     public Uri getImageUri(){

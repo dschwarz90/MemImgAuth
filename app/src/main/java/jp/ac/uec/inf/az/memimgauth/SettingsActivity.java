@@ -18,7 +18,6 @@ import android.preference.PreferenceManager;
 import android.preference.RingtonePreference;
 import android.support.v7.app.ActionBar;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -83,7 +82,6 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                 // For all other preferences, set the summary to the value's
                 // simple string representation.
                 preference.setSummary(stringValue);
-                Log.d("Changed Value;", ""+stringValue);
             }
             return true;
         }
@@ -123,6 +121,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setupActionBar();
+
     }
 
     /**
@@ -177,10 +176,10 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             // Bind the summaries to their values. When their values change, their summaries are
             // updated to reflect the new value, per the Android Design
             // guidelines.
-            bindPreferenceSummaryToValue(findPreference("numberOfDecoyImages"));
+            bindPreferenceSummaryToValue(findPreference("number_of_decoy_images"));
             bindPreferenceSummaryToValue(findPreference("numberOfDisplayedPassImages"));
             bindPreferenceSummaryToValue(findPreference("numberOfLoginAttempts"));
-            bindPreferenceSummaryToValue(findPreference("emailAddress"));
+            bindPreferenceSummaryToValue(findPreference("deletePreferenceButton"));
         }
 
         @Override

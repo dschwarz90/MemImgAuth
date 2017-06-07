@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="key_images_numbers">
+        <item>16</item>
+        <item>56</item>
+        <item>96</item>
+    </string-array><string-array name="key_images_display">
+        <item>Show 16 Key Images</item>
+        <item>Show 56 Key Images</item>
+        <item>Show 96 Key Images</item>
+    </string-array>
+</resources>

@@ -26,7 +26,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
 
 public class authenticate extends AppCompatActivity {
 
@@ -37,6 +36,8 @@ public class authenticate extends AppCompatActivity {
     private Statistics statistics = Statistics.getInstance();
     int authenticationTries = 1;
     private String photoFolderName = "/";
+    private DatabaseConnection dbConnection;
+    int userId = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,17 +45,14 @@ public class authenticate extends AppCompatActivity {
         setContentView(R.layout.show_images);
         gridView = (GridView) findViewById(R.id.gridView);
         selectedPassImages = new HashSet<>();
-        ArrayList<String> imageList;
         TimingLogger timings = new TimingLogger("AUTHENTICATE", "onCreate");
 
-        Bundle b = getIntent().getExtras();
+        userId = getIntent().getIntExtra("userId", 0);
         //receive all the pass images
-        imageList = b.getStringArrayList("passImages");
-        if(imageList.size() > 0){
-            ArrayList<Uri> imageListAsUri = new ArrayList<>(imageList.size());
-            for (Object object : imageList) {
-                imageListAsUri.add(Uri.parse(Objects.toString(object, null)));
-            }
+        if(userId > 0){
+            dbConnection = new DatabaseConnection(this);
+            dbConnection.open();
+            ArrayList<Uri> imageListAsUri = dbConnection.getPassImagesForUser(userId);
             //receiving the folder name of the first pass image (pass images can only originate from the same folder)
             photoFolderName = Environment.getExternalStorageDirectory().toString()+
                     getPhotofolderName(getApplicationContext(), imageListAsUri.get(0));
@@ -63,8 +61,10 @@ public class authenticate extends AppCompatActivity {
             timings.addSplit("getCameraImages()");
             ArrayList<Uri> cameraImages = getCameraImages(getApplicationContext());
             Log.d("cameraImages Size", ""+cameraImages.size());
-            int numberOfDecoyImagesToDisplay = Integer.parseInt(getValueFromSharedPref("numberOfDecoyImages"));
+            int numberOfDecoyImagesToDisplay = Integer.parseInt(getValueFromSharedPref("number_of_decoy_images"));
+            Log.d("Number Decoy Images", ""+numberOfDecoyImagesToDisplay);
             int numberOfPassImagesToDisplay = Integer.parseInt(getValueFromSharedPref("numberOfDisplayedPassImages"));
+            Log.d("Number Pass Images", ""+numberOfPassImagesToDisplay);
             timings.addSplit("pickRandomElements(cameraImages)");
             List<Uri> decoyImagesToDisplay = pickRandomElements(cameraImages, numberOfDecoyImagesToDisplay);
             //preparing the image set for display
@@ -81,7 +81,7 @@ public class authenticate extends AppCompatActivity {
             Collections.shuffle(imagesToDisplay);
             timings.addSplit("create images");
             for (int i=0; i < imagesToDisplay.size(); i++){
-                Image image = new Image(imagesToDisplay.get(i).toString());
+                Image image = new Image(imagesToDisplay.get(i));
                 thumbnails.add(image);
             }
             timings.addSplit("prepare the view");
@@ -116,7 +116,7 @@ public class authenticate extends AppCompatActivity {
             statistics.startAuthentication();
         }
         else{
-            Snackbar.make(gridView, "No Pass Images selected!", Snackbar.LENGTH_LONG).show();
+            Snackbar.make(gridView, "No valid user!", Snackbar.LENGTH_LONG).show();
         }
         timings.dumpToLog();
     }
@@ -231,6 +231,18 @@ public class authenticate extends AppCompatActivity {
 
         }
         return path;
+    }
+
+    @Override
+    protected void onResume() {
+        //dbConnection.open();
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        //dbConnection.close();
+        super.onPause();
     }
 
 }

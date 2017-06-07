@@ -46,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
         dbConnection = new DatabaseConnection(this);
         dbConnection.open();
 
-        TextView username = (TextView) findViewById(R.id.userName);
+        final TextView username = (TextView) findViewById(R.id.userName);
         if(userId > 0){
             username.append(dbConnection.getUserForId(userId).getName());
         }
@@ -68,11 +68,14 @@ public class MainActivity extends AppCompatActivity {
         showPassImages.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-            Intent intent = new Intent(getApplicationContext(), showPassImages.class);
-            final ArrayList<String> arr = getStringArrayPref(getApplicationContext(), "passImages");
-                getPassImagesForUser();
-            intent.putExtra("passImages", arr);
-            startActivity(intent);
+                if(dbConnection.getPassImagesForUser(userId).size() > 0) {
+                    Intent intent = new Intent(getApplicationContext(), showPassImages.class);
+                    intent.putExtra("userId", userId);
+                    startActivity(intent);
+                }
+                else {
+                    Snackbar.make(findViewById(R.id.activity_main),"Please select Pass Images first!", Snackbar.LENGTH_LONG).show();
+                }
             }
         });
 
@@ -82,10 +85,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
             if(userId > 0) {
                 Intent intent = new Intent(getApplicationContext(), authenticate.class);
-                ArrayList<String> selectedPassImages = getStringArrayPref(getApplicationContext(), "passImages");
-                final ArrayList<String> passImagesToDisplay = selectedPassImages;
-                Log.d("pass images len", ""+selectedPassImages.size());
-                intent.putExtra("passImages", passImagesToDisplay);
+                intent.putExtra("userId", userId);
                 startActivity(intent);
             }
             else{
@@ -210,9 +210,6 @@ public class MainActivity extends AppCompatActivity {
         return values;
     }
 
-    private ArrayList<Uri> getPassImagesForUser() {
-        return dbConnection.getPassImagesForUser(userId);
-    }
 
     @Override
     protected void onResume() {
