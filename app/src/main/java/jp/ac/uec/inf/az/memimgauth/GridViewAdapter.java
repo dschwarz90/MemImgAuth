@@ -43,7 +43,6 @@ public class GridViewAdapter extends ArrayAdapter {
         } else {
             holder = (ViewHolder) row.getTag();
         }
-
         setBitmap(holder.image, position, row);
         return row;
     }
@@ -64,9 +63,10 @@ public class GridViewAdapter extends ArrayAdapter {
                         .placeholder(R.raw.loading)
                         .error(R.raw.error)
                         .noFade()
-                        .resize(100, 100)
+                        .resize(150, 150)
                         .centerCrop()
                         .into(iv);
+                row.setBackgroundColor(result.getColor());
             }
         }.execute();
     }

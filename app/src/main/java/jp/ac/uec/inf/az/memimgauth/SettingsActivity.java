@@ -171,15 +171,18 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
             addPreferencesFromResource(R.xml.pref_general);
+
             setHasOptionsMenu(true);
 
             // Bind the summaries to their values. When their values change, their summaries are
             // updated to reflect the new value, per the Android Design
             // guidelines.
+
             bindPreferenceSummaryToValue(findPreference("number_of_decoy_images"));
             bindPreferenceSummaryToValue(findPreference("numberOfDisplayedPassImages"));
             bindPreferenceSummaryToValue(findPreference("numberOfLoginAttempts"));
             bindPreferenceSummaryToValue(findPreference("deletePreferenceButton"));
+
         }
 
         @Override
@@ -197,6 +200,16 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == android.R.id.home) {
+            startActivity(new Intent(this, MainActivity.class));
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
 }

@@ -15,15 +15,17 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
     public static final String COLUMN_ID = "_id";
     public static final String COLUMN_USER = "user";
     public static final String COLUMN_PASSIMAGES = "passimages";
+    public static final String COLUMN_KEYPASSIMAGE = "keypassimage";
 
     private static final String DATABASE_NAME = "memimgauth.db";
-    private static final int DATABASE_VERSION = 3;
+    private static final int DATABASE_VERSION = 5;
 
     // Database creation sql statement
     private static final String DATABASE_CREATE = "create table "
             + TABLE_USERS + "( " + COLUMN_ID
             + " integer primary key autoincrement, " + COLUMN_USER
             + " text not null, " + COLUMN_PASSIMAGES
+            + " text, " + COLUMN_KEYPASSIMAGE
             + " text)  ;";
 
     public static synchronized MySQLiteHelper getInstance(Context context) {

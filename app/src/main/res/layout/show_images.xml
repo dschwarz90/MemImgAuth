@@ -3,21 +3,43 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/selectKeyPassImageButton"
+        android:visibility="visible"
+        android:gravity="center"
+        android:clickable="true"
+        android:text="Select Key Pass Image"/>
+
+    <TextView
+        android:id="@+id/selectedImagesCounter"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="15dp"
+        android:layout_marginTop="15dp"
+        android:gravity="center"
+        android:text="ImageCounter"
+        android:layout_below="@+id/selectKeyPassImageButton"/>
 
 <GridView
     android:id="@+id/gridView"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:listSelector="@color/transparent"
-    android:layout_margin="3dp"
-    android:columnWidth="105dp"
     android:drawSelectorOnTop="true"
-    android:gravity="center"
-    android:numColumns="auto_fit"
     android:stretchMode="columnWidth"
-    android:verticalSpacing="2dp"
-    android:horizontalSpacing="2dp"
+    android:numColumns="4"
     android:focusable="false"
-    android:clickable="true"/>
+    android:clickable="true"
+    android:layout_below="@+id/selectedImagesCounter"
+    android:layout_alignParentStart="true" />
 
 </RelativeLayout>
+
+    <!--
+    android:gravity="center"
+    android:verticalSpacing="1dp"
+        android:columnWidth="100dp"
+            android:layout_margin="2dp"
+    android:horizontalSpacing="1dp"-->

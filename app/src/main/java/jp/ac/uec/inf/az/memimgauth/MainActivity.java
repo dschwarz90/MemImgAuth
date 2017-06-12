@@ -37,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int PICK_IMAGE = 100;
     ArrayList<String> imageList;
     private DatabaseConnection dbConnection;
+    private boolean passImagesSelected = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,13 +84,13 @@ public class MainActivity extends AppCompatActivity {
         authenticate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-            if(userId > 0) {
+            if(userId > 0 && passImagesSelected) {
                 Intent intent = new Intent(getApplicationContext(), authenticate.class);
                 intent.putExtra("userId", userId);
                 startActivity(intent);
             }
             else{
-                Snackbar.make(findViewById(R.id.activity_main),"Please set a user name!", Snackbar.LENGTH_LONG).show();
+                Snackbar.make(findViewById(R.id.activity_main),"Please login and select Pass Images!", Snackbar.LENGTH_LONG).show();
             }
             }
         });
@@ -131,12 +132,17 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if(resultCode == RESULT_OK && requestCode == PICK_IMAGE){
             ClipData clipData = data.getClipData();
-            imageList = new ArrayList<>();
-            for (int i = 0; i < clipData.getItemCount(); i++) {
-                imageList.add(clipData.getItemAt(i).getUri().toString());
+            if(clipData.getItemCount() == 4) {
+                imageList = new ArrayList<>();
+                for (int i = 0; i < clipData.getItemCount(); i++) {
+                    imageList.add(clipData.getItemAt(i).getUri().toString());
+                }
+                setPassImagesForUser(imageList);
+                passImagesSelected = true;
             }
-            //setStringArrayPref(getApplicationContext(), "passImages", imageList);
-            setPassImagesForUser(imageList);
+            else{
+                Snackbar.make(findViewById(R.id.activity_main),"Please select 4 Pass Images!", Snackbar.LENGTH_LONG).show();
+            }
         }
     }
 

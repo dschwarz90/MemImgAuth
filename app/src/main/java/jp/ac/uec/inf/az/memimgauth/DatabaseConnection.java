@@ -138,4 +138,32 @@ public class DatabaseConnection {
         user.setName(cursor.getString(1));
         return user;
     }
+
+    public boolean setKeyPassImageForUser(int userId, Uri keyPassImage){
+        ContentValues values = new ContentValues();
+        values.put(MySQLiteHelper.COLUMN_KEYPASSIMAGE, keyPassImage.toString());
+        String[] args = { String.valueOf(userId) };
+        int count = database.update(MySQLiteHelper.TABLE_USERS,
+                values,
+                MySQLiteHelper.COLUMN_ID + " = ?",
+                args);
+        Log.d("Key pass image for uid", ""+ userId);
+        return count > 0;
+    }
+
+    public Uri getKeyPassImageForUser(int userid){
+        String[] tables = { MySQLiteHelper.COLUMN_KEYPASSIMAGE };
+        String[] args = { String.valueOf(userid) };
+        Uri keyPassImage = null;
+        Cursor cursor = database.query(MySQLiteHelper.TABLE_USERS,
+                tables, MySQLiteHelper.COLUMN_ID + " = ?", args, null, null, null);
+        if(cursor!=null && cursor.getCount()>0) {
+            cursor.moveToFirst();
+            String keyPassImageUri = cursor.getString(0);
+            keyPassImage = Uri.parse(keyPassImageUri);
+        }
+        cursor.close();
+        Log.d("DB Key Pass Image", keyPassImage.toString());
+        return keyPassImage;
+    }
 }

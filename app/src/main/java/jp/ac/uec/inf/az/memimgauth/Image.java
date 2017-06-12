@@ -1,5 +1,6 @@
 package jp.ac.uec.inf.az.memimgauth;
 
+import android.graphics.Color;
 import android.net.Uri;
 
 /**
@@ -10,6 +11,7 @@ public class Image {
 
     private Uri imageUri;
     boolean isChecked = false;
+    int color = Color.TRANSPARENT;
 
     public Image(Uri uri) {
         this.imageUri = uri;
@@ -25,4 +27,14 @@ public class Image {
     public void toggleChecked(){
         isChecked = !isChecked;
     }
+
+    public void setColor(int color){
+        this.color = color;
+    }
+
+    public int getColor(){
+        return this.color;
+    }
+
+
 }
