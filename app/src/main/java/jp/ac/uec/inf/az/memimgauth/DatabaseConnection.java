@@ -154,16 +154,20 @@ public class DatabaseConnection {
     public Uri getKeyPassImageForUser(int userid){
         String[] tables = { MySQLiteHelper.COLUMN_KEYPASSIMAGE };
         String[] args = { String.valueOf(userid) };
-        Uri keyPassImage = null;
+        Uri keyPassImage = Uri.parse("");
         Cursor cursor = database.query(MySQLiteHelper.TABLE_USERS,
                 tables, MySQLiteHelper.COLUMN_ID + " = ?", args, null, null, null);
         if(cursor!=null && cursor.getCount()>0) {
             cursor.moveToFirst();
             String keyPassImageUri = cursor.getString(0);
-            keyPassImage = Uri.parse(keyPassImageUri);
+            if (keyPassImageUri!= null && !keyPassImageUri.equals( Uri.EMPTY)) {
+                keyPassImage = Uri.parse(keyPassImageUri);
+            }
+            else {
+                Log.d("Error selecting", "Key Pass Image for uid "+userid);
+            }
         }
         cursor.close();
-        Log.d("DB Key Pass Image", keyPassImage.toString());
         return keyPassImage;
     }
 }

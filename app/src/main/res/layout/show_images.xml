@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -22,18 +23,43 @@
         android:text="ImageCounter"
         android:layout_below="@+id/selectKeyPassImageButton"/>
 
-<GridView
-    android:id="@+id/gridView"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:listSelector="@color/transparent"
-    android:drawSelectorOnTop="true"
-    android:stretchMode="columnWidth"
-    android:numColumns="4"
-    android:focusable="false"
-    android:clickable="true"
-    android:layout_below="@+id/selectedImagesCounter"
-    android:layout_alignParentStart="true" />
+    <GridView
+        android:id="@+id/gridView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:listSelector="@color/transparent"
+        android:drawSelectorOnTop="true"
+        android:stretchMode="columnWidth"
+        android:numColumns="4"
+        android:focusable="false"
+        android:clickable="true"
+        android:layout_below="@+id/selectedImagesCounter"
+        android:layout_alignParentStart="true" />
+
+    <RelativeLayout
+        android:id="@+id/InnerRelativeLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true" >
+
+        <ImageButton
+            app:srcCompat="@android:drawable/arrow_up_float"
+            android:id="@+id/pageUpButton"
+            android:layout_alignParentLeft="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+        </ImageButton>
+
+        <ImageButton
+            app:srcCompat="@android:drawable/arrow_down_float"
+            android:id="@+id/pageDownButton"
+            android:layout_alignParentRight="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+        </ImageButton>
+    </RelativeLayout>
+
+
 
 </RelativeLayout>
 

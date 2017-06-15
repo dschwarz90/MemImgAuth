@@ -7,9 +7,11 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
+import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -20,9 +22,12 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.GridView;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -52,31 +57,35 @@ public class authenticate extends AppCompatActivity {
 
         textView = (TextView)findViewById(R.id.selectedImagesCounter);
         changeImageCounterText(textView);
+        Button selectKeyPassImageButton = (Button)findViewById(R.id.selectKeyPassImageButton);
+        selectKeyPassImageButton.setVisibility(View.GONE);
         userId = getIntent().getIntExtra("userId", 0);
+
         //receive all the pass images
         if(userId > 0){
-
             dbConnection = new DatabaseConnection(this);
             dbConnection.open();
             ArrayList<Uri> imageListAsUri = dbConnection.getPassImagesForUser(userId);
             //receiving the folder name of the first pass image (pass images can only originate from the same folder)
-            photoFolderName = Environment.getExternalStorageDirectory().toString()+
-                    getPhotofolderName(getApplicationContext(), imageListAsUri.get(0));
-
+            photoFolderName = getPhotofolderName(getApplicationContext(), imageListAsUri.get(0));
             ArrayList<Image> thumbnails = new ArrayList<>();
             timings.addSplit("getCameraImages()");
             ArrayList<Uri> cameraImages = getCameraImages(getApplicationContext());
-            int numberOfDecoyImagesToDisplay = Integer.parseInt(getValueFromSharedPref("number_of_decoy_images"));
-            int numberOfPassImagesToDisplay = Integer.parseInt(getValueFromSharedPref("numberOfDisplayedPassImages"));
+            Log.d("Size cameraImages", ""+cameraImages.size());
+            final int numberOfDecoyImagesToDisplay = getIntent().getIntExtra("numberOfDecoyImages", 0);
+            int numberOfPassImagesToDisplay = 4;
+            //int numberOfPassImagesToDisplay = Integer.parseInt(getValueFromSharedPref("numberOfDisplayedPassImages"));
             timings.addSplit("pickRandomElements(cameraImages)");
             List<Uri> decoyImagesToDisplay = pickRandomElements(cameraImages, numberOfDecoyImagesToDisplay);
+            Log.d("Size decoyImagesToDispl", ""+decoyImagesToDisplay.size());
             //preparing the image set for display
             timings.addSplit("pickRandomElements(imageListAsUri)");
             List<Uri> imagesToDisplay = pickRandomElements(imageListAsUri, numberOfPassImagesToDisplay);
+            Log.d("Size passImagesToDispl", ""+imagesToDisplay.size());
             passImages = new HashSet<>(imagesToDisplay);
             for (int i=0; i < decoyImagesToDisplay.size(); i++){
                 if(!imagesToDisplay.contains(decoyImagesToDisplay.get(i))) {
-                    imagesToDisplay.add(decoyImagesToDisplay.get(i));
+                    imagesToDisplay.add(decoyImagesToDisplay.get(i)); //todo no photo duplicates!
                 }
             }
             //shuffle the list to randomize the order
@@ -107,7 +116,7 @@ public class authenticate extends AppCompatActivity {
                             selectedImage.setColor(Color.RED);
                         }
                         else{
-                            selectedImage.setColor(Color.CYAN);
+                            selectedImage.setColor(Color.BLUE);
                         }
                         selectedPassImages.add(selectedImage.getImageUri());
                     }
@@ -122,14 +131,32 @@ public class authenticate extends AppCompatActivity {
                     changeImageCounterText(textView);
                 }
             });
+            ImageButton buttonUp = (ImageButton)findViewById(R.id.pageUpButton);
+
+            buttonUp.setOnClickListener(new View.OnClickListener() {
+                int currentPos = 0;
+                @Override
+                public void onClick(View v) {
+                    currentPos = currentPos - 20;
+                    gridView.smoothScrollToPosition((currentPos)%numberOfDecoyImagesToDisplay);
+
+                }
+            });
+            ImageButton buttonDown = (ImageButton)findViewById(R.id.pageDownButton);
+            buttonDown.setOnClickListener(new View.OnClickListener() {
+                int currentPos = 0;
+                @Override
+                public void onClick(View v) {
+                    currentPos = currentPos + 20;
+                    gridView.smoothScrollToPosition((currentPos)%numberOfDecoyImagesToDisplay);
+                }
+            });
         }
         else{
             Snackbar.make(gridView, "No valid user!", Snackbar.LENGTH_LONG).show();
         }
         timings.dumpToLog();
     }
-
-
 
     /**
      * gets all the photos from the camera gallery
@@ -142,7 +169,6 @@ public class authenticate extends AppCompatActivity {
                 MediaStore.Images.Media.DATA
         };
         final String selection = MediaStore.Images.Media.BUCKET_ID + " = ?";
-        Log.d("Path", photoFolderName);
         final String[] selectionArgs = { getBucketId(photoFolderName) };
         final Cursor cursor = context.getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
                 projection,
@@ -193,7 +219,8 @@ public class authenticate extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        int authenticationMaxAttempts = Integer.parseInt(getValueFromSharedPref("numberOfLoginAttempts"));
+        //int authenticationMaxAttempts = Integer.parseInt(getValueFromSharedPref("numberOfLoginAttempts"));
+        int authenticationMaxAttempts = 3;
         statistics.setMaxAuthenticationTries(authenticationMaxAttempts);
         // Handle item selection
         switch (item.getItemId()) {
@@ -228,20 +255,14 @@ public class authenticate extends AppCompatActivity {
     //finds the path of selected pass images.
     public String getPhotofolderName(Context context, Uri uri)
     {
-        String path = "";
-        Cursor cursor = context.getContentResolver().query(uri, null, null,
-                null, null);
-        if (cursor.moveToFirst())
-        {
-            int column_index =
-                    cursor .getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-            Uri filePathUri = Uri.parse(cursor .getString(column_index));
-            List<String>  pathsegments = filePathUri.getPathSegments();
-            path= "/"+pathsegments.get(pathsegments.size()-3)+"/"; //DCIM or custom folder
-            path+= pathsegments.get(pathsegments.size()-2); // subfolder
+        String absolutePhotoPath = getFilePath(context, uri);
+        /*String path = "";
+        List<String> pathsegments = filePathUri.getPathSegments();
+        path = "/" + pathsegments.get(pathsegments.size() - 3) + "/"; //DCIM or custom folder
+        path += pathsegments.get(pathsegments.size() - 2); // subfolder*/
+        File file = new File(absolutePhotoPath);
 
-        }
-        return path;
+        return file.getParent();
     }
 
     @Override
@@ -260,6 +281,147 @@ public class authenticate extends AppCompatActivity {
         if(textView != null) {
             textView.setText(selectedImagesCounter + " Pass Images selected");
         }
+    }
+
+    /**
+     * From https://stackoverflow.com/questions/19834842/android-gallery-on-kitkat-returns-different-uri-for-intent-action-get-content
+     * Get a file path from a Uri. This will get the the path for Storage Access
+     * Framework Documents, as well as the _data field for the MediaStore and
+     * other file-based ContentProviders.
+     *
+     * @param context The context.
+     * @param uri The Uri to query.
+     * @author paulburke
+     */
+    public static String getFilePath(final Context context, final Uri uri) {
+
+        final boolean isKitKat = Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;
+
+        // DocumentProvider
+        if (isKitKat && DocumentsContract.isDocumentUri(context, uri)) {
+            // ExternalStorageProvider
+            if (isExternalStorageDocument(uri)) {
+                final String docId = DocumentsContract.getDocumentId(uri);
+                final String[] split = docId.split(":");
+                final String type = split[0];
+
+                if ("primary".equalsIgnoreCase(type)) {
+                    return Environment.getExternalStorageDirectory() + "/" + split[1];
+                }
+            }
+            // DownloadsProvider
+            else if (isDownloadsDocument(uri)) {
+
+                final String id = DocumentsContract.getDocumentId(uri);
+                final Uri contentUri = ContentUris.withAppendedId(
+                        Uri.parse("content://downloads/public_downloads"), Long.valueOf(id));
+
+                return getDataColumn(context, contentUri, null, null);
+            }
+            // MediaProvider
+            else if (isMediaDocument(uri)) {
+                final String docId = DocumentsContract.getDocumentId(uri);
+                final String[] split = docId.split(":");
+                final String type = split[0];
+
+                Uri contentUri = null;
+                if ("image".equals(type)) {
+                    contentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+                } else if ("video".equals(type)) {
+                    contentUri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
+                } else if ("audio".equals(type)) {
+                    contentUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+                }
+
+                final String selection = "_id=?";
+                final String[] selectionArgs = new String[] {
+                        split[1]
+                };
+
+                return getDataColumn(context, contentUri, selection, selectionArgs);
+            }
+        }
+        // MediaStore (and general)
+        else if ("content".equalsIgnoreCase(uri.getScheme())) {
+
+            // Return the remote address
+            if (isGooglePhotosUri(uri))
+                return uri.getLastPathSegment();
+
+            return getDataColumn(context, uri, null, null);
+        }
+        // File
+        else if ("file".equalsIgnoreCase(uri.getScheme())) {
+            return uri.getPath();
+        }
+
+        return null;
+    }
+
+    /**
+     * Get the value of the data column for this Uri. This is useful for
+     * MediaStore Uris, and other file-based ContentProviders.
+     *
+     * @param context The context.
+     * @param uri The Uri to query.
+     * @param selection (Optional) Filter used in the query.
+     * @param selectionArgs (Optional) Selection arguments used in the query.
+     * @return The value of the _data column, which is typically a file path.
+     */
+    public static String getDataColumn(Context context, Uri uri, String selection,
+                                       String[] selectionArgs) {
+
+        Cursor cursor = null;
+        final String column = "_data";
+        final String[] projection = {
+                column
+        };
+
+        try {
+            cursor = context.getContentResolver().query(uri, projection, selection, selectionArgs,
+                    null);
+            if (cursor != null && cursor.moveToFirst()) {
+                final int index = cursor.getColumnIndexOrThrow(column);
+                return cursor.getString(index);
+            }
+        } finally {
+            if (cursor != null)
+                cursor.close();
+        }
+        return null;
+    }
+
+
+    /**
+     * @param uri The Uri to check.
+     * @return Whether the Uri authority is ExternalStorageProvider.
+     */
+    public static boolean isExternalStorageDocument(Uri uri) {
+        return "com.android.externalstorage.documents".equals(uri.getAuthority());
+    }
+
+    /**
+     * @param uri The Uri to check.
+     * @return Whether the Uri authority is DownloadsProvider.
+     */
+    public static boolean isDownloadsDocument(Uri uri) {
+        return "com.android.providers.downloads.documents".equals(uri.getAuthority());
+    }
+
+    /**
+     * @param uri The Uri to check.
+     * @return Whether the Uri authority is MediaProvider.
+     */
+    public static boolean isMediaDocument(Uri uri) {
+        return "com.android.providers.media.documents".equals(uri.getAuthority());
+    }
+
+    /**
+     * @param uri The Uri to check.
+     * @return Whether the Uri authority is Google Photos.
+     */
+    public static boolean isGooglePhotosUri(Uri uri) {
+        return "com.google.android.apps.photos.content".equals(uri.getAuthority());
     }
 
 }

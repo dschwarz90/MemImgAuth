@@ -5,11 +5,11 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.GridView;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -54,11 +54,9 @@ public class showPassImages extends AppCompatActivity {
             imageList = dbConnection.getPassImagesForUser(userId);
             for (int i=0; i < imageList.size(); i++){
                 Image image = new Image(imageList.get(i));
-                if(image.getImageUri().equals(selectedKeyPassImage)){
-
+                if(selectedKeyPassImage != null && image.getImageUri().equals(selectedKeyPassImage)){
                     image.setColor(Color.RED);
                 }
-                Log.d("Image uri is the same", Boolean.toString(image.getImageUri().equals(selectedKeyPassImage)));
                 thumbnails.add(image);
             }
         }
@@ -66,7 +64,7 @@ public class showPassImages extends AppCompatActivity {
         gridAdapter = new GridViewAdapter(this, R.layout.grid_item_layout, thumbnails);
         gridView.setAdapter(gridAdapter);
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
+            public void onItemClick(AdapterView<?> parent, View v, int position, long id) { //TODO: Select only one
                 Image selectedImage = (Image) gridAdapter.getItem(position);
                 selectedImage.toggleChecked();
                 if(selectedImage.isChecked()){
@@ -81,6 +79,9 @@ public class showPassImages extends AppCompatActivity {
                 gridAdapter.notifyDataSetChanged();
             }
         });
-
+        ImageButton buttonUp = (ImageButton)findViewById(R.id.pageUpButton);
+        buttonUp.setVisibility(View.GONE);
+        ImageButton buttonDown = (ImageButton)findViewById(R.id.pageDownButton);
+        buttonDown.setVisibility(View.GONE);
     }
 }

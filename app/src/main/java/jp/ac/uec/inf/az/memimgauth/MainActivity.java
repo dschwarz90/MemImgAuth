@@ -30,14 +30,14 @@ import java.util.ArrayList;
  */
 public class MainActivity extends AppCompatActivity {
 
-    Button button;
+    Button selectPassImagesButton;
     Button showPassImages;
-    Button authenticate;
     int userId = 0;
     private static final int PICK_IMAGE = 100;
     ArrayList<String> imageList;
     private DatabaseConnection dbConnection;
     private boolean passImagesSelected = false;
+    //int permissionCheck = ContextCompat.checkSelfPermission(this,Manifest.permission.MANAGE_DOCUMENTS);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,8 +55,8 @@ public class MainActivity extends AppCompatActivity {
             username.setText("You are not logged in!");
         }
 
-        button = (Button)findViewById(R.id.selectPassImagesButton);
-        button.setOnClickListener(new View.OnClickListener() {
+        selectPassImagesButton = (Button)findViewById(R.id.selectPassImagesButton);
+        selectPassImagesButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if(userId > 0) {
@@ -80,18 +80,30 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        authenticate = (Button)findViewById(R.id.authenticateButton);
-        authenticate.setOnClickListener(new View.OnClickListener() {
+        Button authenticate_20 = (Button)findViewById(R.id.authenticateButton_20);
+        authenticate_20.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-            if(userId > 0 && passImagesSelected) {
-                Intent intent = new Intent(getApplicationContext(), authenticate.class);
-                intent.putExtra("userId", userId);
-                startActivity(intent);
+                //openAuthenticationScreen(findViewById(R.id.activity_main), 20);
+                openAuthenticationScreen(v, 16);
             }
-            else{
-                Snackbar.make(findViewById(R.id.activity_main),"Please login and select Pass Images!", Snackbar.LENGTH_LONG).show();
+        });
+
+        Button authenticate_60 = (Button)findViewById(R.id.authenticateButton_60);
+        authenticate_60.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //openAuthenticationScreen(findViewById(R.id.activity_main), 20);
+                openAuthenticationScreen(v, 56);
             }
+        });
+
+        Button authenticate_100 = (Button)findViewById(R.id.authenticateButton_100);
+        authenticate_100.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //openAuthenticationScreen(findViewById(R.id.activity_main), 20);
+                openAuthenticationScreen(v, 96);
             }
         });
 
@@ -121,27 +133,37 @@ public class MainActivity extends AppCompatActivity {
      * @return void
      */
     private void openGallery(){
-        Intent gallery = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.INTERNAL_CONTENT_URI);
-        gallery.setType("image/*");
+        /*Intent gallery = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.INTERNAL_CONTENT_URI);
+        gallery.setType("image*//*");
         gallery.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-        startActivityForResult(gallery, PICK_IMAGE);
+        startActivityForResult(gallery, PICK_IMAGE);*/
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT, MediaStore.Images.Media.INTERNAL_CONTENT_URI);
+        intent.setType("image/*");
+        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        startActivityForResult(intent, PICK_IMAGE);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data){
         super.onActivityResult(requestCode, resultCode, data);
-        if(resultCode == RESULT_OK && requestCode == PICK_IMAGE){
-            ClipData clipData = data.getClipData();
-            if(clipData.getItemCount() == 4) {
-                imageList = new ArrayList<>();
-                for (int i = 0; i < clipData.getItemCount(); i++) {
-                    imageList.add(clipData.getItemAt(i).getUri().toString());
+        if(resultCode == RESULT_OK && requestCode == PICK_IMAGE && data != null) {
+            if (data.getClipData() != null) {
+                ClipData clipData = data.getClipData();
+                if (clipData.getItemCount() == 4) {
+                    imageList = new ArrayList<>();
+                    for (int i = 0; i < clipData.getItemCount(); i++) {
+                        imageList.add(clipData.getItemAt(i).getUri().toString());
+                    }
+                    setPassImagesForUser(imageList);
+                    passImagesSelected = true;
                 }
-                setPassImagesForUser(imageList);
-                passImagesSelected = true;
+                else {
+                    Snackbar.make(findViewById(R.id.activity_main), clipData.getItemCount() + " Images selected. Please select 4 Pass Images!", Snackbar.LENGTH_LONG).show();
+                }
             }
-            else{
-                Snackbar.make(findViewById(R.id.activity_main),"Please select 4 Pass Images!", Snackbar.LENGTH_LONG).show();
+            else {
+                Snackbar.make(findViewById(R.id.activity_main), "Please select 4 Pass Images!", Snackbar.LENGTH_LONG).show();
             }
         }
     }
@@ -229,4 +251,15 @@ public class MainActivity extends AppCompatActivity {
         super.onPause();
     }
 
+    public void openAuthenticationScreen(View view, int numberOfDecoyImages){
+        if(userId > 0 && passImagesSelected) {
+            Intent intent = new Intent(getApplicationContext(), authenticate.class);
+            intent.putExtra("userId", userId);
+            intent.putExtra("numberOfDecoyImages", numberOfDecoyImages);
+            startActivity(intent);
+        }
+        else{
+            Snackbar.make(view,"Please login and select Pass Images!", Snackbar.LENGTH_LONG).show();
+        }
+    }
 }
