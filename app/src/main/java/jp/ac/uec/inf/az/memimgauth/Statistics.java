@@ -22,6 +22,7 @@ public class Statistics {
     private ArrayList<Uri> enteredPassImages = new ArrayList<>();
     private int numberOfPassImages = 0;
     private int numberOfDecoyImages = 0;
+    private boolean authenticationIsSuccessful = false;
 
     private static final Statistics ourInstance = new Statistics();
 
@@ -104,5 +105,13 @@ public class Statistics {
 
     public void setMaxAuthenticationTries(int maxAuthenticationTries) {
         this.maxAuthenticationTries = maxAuthenticationTries;
+    }
+
+    public boolean isAuthenticationIsSuccessful() {
+        return authenticationIsSuccessful;
+    }
+
+    public void setAuthenticationIsSuccessful(boolean authenticationIsSuccessful) {
+        this.authenticationIsSuccessful = authenticationIsSuccessful;
     }
 }

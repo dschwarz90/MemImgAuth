@@ -34,6 +34,12 @@ public class authenticationSuccess extends AppCompatActivity {
             }
         });
         Log.d("needed time", statistics.getNeededTimeForAuthenticationProcess());
+        if(statistics.isAuthenticationIsSuccessful()){
+            setTitle("Authentication Success!");
+        }
+        else {
+            setTitle("Authentication Failure!");
+        }
     }
 
     @Override

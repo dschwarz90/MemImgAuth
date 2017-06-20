@@ -54,7 +54,8 @@ public class MainActivity extends AppCompatActivity {
         else {
             username.setText("You are not logged in!");
         }
-
+        //did the user already select some pass images?
+        passImagesSelected = dbConnection.getPassImagesForUser(userId).size() > 0;
         selectPassImagesButton = (Button)findViewById(R.id.selectPassImagesButton);
         selectPassImagesButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -156,7 +157,6 @@ public class MainActivity extends AppCompatActivity {
                         imageList.add(clipData.getItemAt(i).getUri().toString());
                     }
                     setPassImagesForUser(imageList);
-                    passImagesSelected = true;
                 }
                 else {
                     Snackbar.make(findViewById(R.id.activity_main), clipData.getItemCount() + " Images selected. Please select 4 Pass Images!", Snackbar.LENGTH_LONG).show();
