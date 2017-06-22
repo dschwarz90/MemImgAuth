@@ -5,28 +5,33 @@ import android.net.Uri;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by azlabadm on 15.05.2017.
  */
 
 public class Statistics {
-    private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
     private String dateOfToday;
     private String  startTime;
     private String  endTime;
     private String  neededTimeForAuthenticationProcess;
     private String username;
-    private int authenticationTries = 1;
+    private int userid;
+    private int authenticationTries = 0;
     private int maxAuthenticationTries = 0;
     private ArrayList<Uri> enteredPassImages = new ArrayList<>();
     private int numberOfPassImages = 0;
     private int numberOfDecoyImages = 0;
-    private boolean authenticationIsSuccessful = false;
+    private Enum<AuthResult> authenticationResult;
 
-    private static final Statistics ourInstance = new Statistics();
+    private static Statistics ourInstance = null;
 
-    public static Statistics getInstance() {
+    public static synchronized Statistics getInstance() {
+        if(ourInstance == null) {
+            ourInstance = new Statistics();
+        }
         return ourInstance;
     }
 
@@ -40,6 +45,14 @@ public class Statistics {
 
     public void setUsername(String username){
         this.username = username;
+    }
+
+    public int getUserId() {
+        return userid;
+    }
+
+    public void setUserId(int userid) {
+        this.userid = userid;
     }
 
     public String getNeededTimeForAuthenticationProcess(){
@@ -56,11 +69,20 @@ public class Statistics {
             Date start = sdf.parse(startTime);
             Date end = sdf.parse(endTime);
             long diff = end.getTime() - start.getTime();
+
             long absDiff = Math.abs(diff);
-            int hours = (int) (absDiff/(1000 * 60 * 60));
-            int min = (int) (absDiff/(1000*60)) % 60;
-            long secs = (int) (absDiff / 1000) % 60;
-            neededTimeForAuthenticationProcess = hours+":"+min+":"+secs;
+            long hours =  (absDiff/(1000 * 60 * 60));
+            //long min =  absDiff / (60 * 1000) % 60;
+            //long secs = absDiff / 1000 % 60;
+            //long millis = diff;
+            long min = TimeUnit.MILLISECONDS.toMinutes(diff);
+            long secs = TimeUnit.MILLISECONDS.toSeconds(diff);
+            long millis = TimeUnit.MILLISECONDS.toMillis(diff);
+            neededTimeForAuthenticationProcess = String.format("%d sec: %03d ms",
+                    //TimeUnit.MILLISECONDS.toMinutes(absDiff),
+                    TimeUnit.MILLISECONDS.toSeconds(absDiff), //- TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(absDiff)),
+                    TimeUnit.MILLISECONDS.toMillis(absDiff) - TimeUnit.SECONDS.toMillis(TimeUnit.MILLISECONDS.toSeconds(absDiff))
+            );
         }
         catch (Exception e){
             e.printStackTrace();
@@ -107,11 +129,15 @@ public class Statistics {
         this.maxAuthenticationTries = maxAuthenticationTries;
     }
 
-    public boolean isAuthenticationIsSuccessful() {
-        return authenticationIsSuccessful;
+    public Enum<AuthResult> getAuthenticationResult() {
+        return authenticationResult;
     }
 
-    public void setAuthenticationIsSuccessful(boolean authenticationIsSuccessful) {
-        this.authenticationIsSuccessful = authenticationIsSuccessful;
+    public void setAuthenticationResult(Enum<AuthResult> result) {
+        authenticationResult = result;
+    }
+
+    public void reset(){
+        ourInstance = null;
     }
 }

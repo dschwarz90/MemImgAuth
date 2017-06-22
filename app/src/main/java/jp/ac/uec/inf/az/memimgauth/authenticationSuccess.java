@@ -9,6 +9,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -34,12 +37,38 @@ public class authenticationSuccess extends AppCompatActivity {
             }
         });
         Log.d("needed time", statistics.getNeededTimeForAuthenticationProcess());
-        if(statistics.isAuthenticationIsSuccessful()){
+        ImageView imageView = (ImageView)findViewById(R.id.imageView);
+        if(statistics.getAuthenticationResult() == AuthResult.OK){
             setTitle("Authentication Success!");
+            imageView.setImageResource(+R.raw.success);
         }
         else {
             setTitle("Authentication Failure!");
         }
+        //display needed time
+        TextView operationTime = (TextView)findViewById(R.id.operationTime);
+        operationTime.setText(statistics.getNeededTimeForAuthenticationProcess());
+
+        Button retryButton = (Button) findViewById(R.id.retryButton);
+        retryButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getApplicationContext(), authenticate.class);
+                intent.putExtra("userId", statistics.getUserId());
+                intent.putExtra("numberOfDecoyImages", statistics.getNumberOfDecoyImages());
+                startActivity(intent);
+            }
+        });
+
+        Button userChooserButton = (Button) findViewById(R.id.userChooserButton);
+        userChooserButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getApplicationContext(), SelectUsers.class);
+                startActivity(intent);
+            }
+        });
+        statistics.reset();
     }
 
     @Override
@@ -49,7 +78,7 @@ public class authenticationSuccess extends AppCompatActivity {
     }
 
     private void processStatisticsMail(){
-        String[] recipients = {"ds313373@gmail.com"};
+        String[] recipients = {"ds313373@gmail.com", "uecazlab@gmail.com"};
         String message = "Please find attached the Research Data.";
         File data = null;
         Date dateVal = new Date();
@@ -106,5 +135,11 @@ public class authenticationSuccess extends AppCompatActivity {
         return writer;
     }
 
-
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+        intent.putExtra("userId", statistics.getUserId());
+        startActivity(intent);
+    }
 }

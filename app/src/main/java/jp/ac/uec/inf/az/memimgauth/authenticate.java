@@ -31,6 +31,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 
 public class authenticate extends AppCompatActivity {
@@ -40,7 +41,6 @@ public class authenticate extends AppCompatActivity {
     private HashSet<Uri> selectedPassImages;
     private HashSet<Uri> passImages;
     private Statistics statistics = Statistics.getInstance();
-    int authenticationTries = 1;
     private String photoFolderName = "/";
     private DatabaseConnection dbConnection;
     TextView textView;
@@ -66,9 +66,9 @@ public class authenticate extends AppCompatActivity {
         if(userId > 0){
             dbConnection = new DatabaseConnection(this);
             dbConnection.open();
-            ArrayList<Uri> imageListAsUri = dbConnection.getPassImagesForUser(userId);
+            ArrayList<Uri> passImagesForUser = dbConnection.getPassImagesForUser(userId);
             //receiving the folder name of the first pass image (pass images can only originate from the same folder)
-            photoFolderName = getPhotofolderName(getApplicationContext(), imageListAsUri.get(0));
+            photoFolderName = getPhotofolderName(getApplicationContext(), passImagesForUser.get(0));
             ArrayList<Image> thumbnails = new ArrayList<>();
             timings.addSplit("getCameraImages()");
             ArrayList<Uri> cameraImages = getCameraImages(getApplicationContext());
@@ -77,18 +77,36 @@ public class authenticate extends AppCompatActivity {
             int numberOfPassImagesToDisplay = 4;
             //int numberOfPassImagesToDisplay = Integer.parseInt(getValueFromSharedPref("numberOfDisplayedPassImages"));
             timings.addSplit("pickRandomElements(cameraImages)");
-            List<Uri> decoyImagesToDisplay = pickRandomElements(cameraImages, numberOfDecoyImagesToDisplay);
+            List<Uri> decoyImagesToDisplay = pickRandomElements(cameraImages, numberOfDecoyImagesToDisplay+4);
             //preparing the image set for display
             timings.addSplit("pickRandomElements(imageListAsUri)");
-            List<Uri> imagesToDisplay = pickRandomElements(imageListAsUri, numberOfPassImagesToDisplay);
-            passImages = new HashSet<>(imagesToDisplay);
-            for (int i=0; i < decoyImagesToDisplay.size(); i++){
-                if(!imagesToDisplay.contains(decoyImagesToDisplay.get(i))) {
-                    imagesToDisplay.add(decoyImagesToDisplay.get(i)); //todo no photo duplicates!
-                }
+            List<Uri> imagesToDisplay = pickRandomElements(passImagesForUser, numberOfPassImagesToDisplay);
+            passImages = new HashSet<>(passImagesForUser);
+            //since pass images and decoy images have diffent URIs, we need to compare the file path
+            HashSet<String> imagesToDisplayPaths = new HashSet<>();
+            for (int i=0; i < passImagesForUser.size(); i++){
+                imagesToDisplayPaths.add(getFilePath(getApplicationContext(), passImagesForUser.get(i)));
             }
-            for (int i=0; i < imagesToDisplay.size(); i++){
-                Log.d("Uri", getFilePath(getApplicationContext(), imagesToDisplay.get(i))); //todo compare photo path
+            Iterator<Uri> iterator = decoyImagesToDisplay.iterator();
+            int numberToDisplay = numberOfDecoyImagesToDisplay+numberOfPassImagesToDisplay;
+            Log.d("Should show", numberToDisplay+" images");
+            while(imagesToDisplayPaths.size() < numberToDisplay){
+                //we don't want to have duplicates
+                if(iterator.hasNext()) {
+                    Uri uri = iterator.next();
+                    String path = getFilePath(getApplicationContext(), uri);
+                    if (!imagesToDisplayPaths.contains(path)){
+                        imagesToDisplayPaths.add(path);
+                        imagesToDisplay.add(uri);
+                    }
+                    else {
+                        Log.d("Found collision", "selecting new decoy img");
+                    }
+                }
+                else {
+                    Log.d("Will display", imagesToDisplay.size()+" images");
+                    break;
+                }
             }
             //shuffle the list to randomize the order
             timings.addSplit("shuffle(imagesToDisplay");
@@ -101,19 +119,24 @@ public class authenticate extends AppCompatActivity {
             timings.addSplit("prepare the view");
             final User user = dbConnection.getUserForId(userId);
             statistics.setUsername(user.getName());
+            statistics.setUserId(user.getId());
             statistics.setNumberOfDecoyImages(numberOfDecoyImagesToDisplay);
             statistics.setNumberOfPassImages(numberOfPassImagesToDisplay);
             statistics.startAuthentication();
             gridAdapter = new GridViewAdapter(this, R.layout.grid_item_layout, thumbnails);
             gridView.setAdapter(gridAdapter);
             gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                int clickCounter = 0;
                 public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
+                    clickCounter++;
                     Image selectedImage = (Image) gridAdapter.getItem(position);
-                    if(selectedImage.getImageUri().equals(dbConnection.getKeyPassImageForUser(userId))){
+                    if(clickCounter == 1
+                            && selectedImage.getImageUri().equals(dbConnection.getKeyPassImageForUser(userId))){
                         keyImageSuccessfullySelected = true;
                     }
                     statistics.addEnteredPassImage(selectedImage.getImageUri());
                     selectedImage.toggleChecked();
+                    //todo max selectable should be 4
                     if(selectedImage.isChecked()){
                         selectedImagesCounter++;
                         //change bg color
@@ -143,7 +166,7 @@ public class authenticate extends AppCompatActivity {
                 @Override
                 public void onClick(View v) {
                     currentPos = currentPos - 20;
-                    gridView.smoothScrollToPosition((currentPos)%numberOfDecoyImagesToDisplay);
+                    gridView.smoothScrollToPosition(Math.abs((currentPos)%numberOfDecoyImagesToDisplay+4));
 
                 }
             });
@@ -153,7 +176,7 @@ public class authenticate extends AppCompatActivity {
                 @Override
                 public void onClick(View v) {
                     currentPos = currentPos + 20;
-                    gridView.smoothScrollToPosition((currentPos)%numberOfDecoyImagesToDisplay);
+                    gridView.smoothScrollToPosition((currentPos)%numberOfDecoyImagesToDisplay+4);
                 }
             });
         }
@@ -231,29 +254,38 @@ public class authenticate extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.authenticate:
                 //handle the authentication
-                if(authenticationTries <= authenticationMaxAttempts
-                        && selectedPassImages.equals(passImages)
-                        && !passImages.isEmpty()) {
-                    statistics.setAuthenticationIsSuccessful(true);
-                    statistics.endAuthentication();
-                    Intent intent = new Intent(this, authenticationSuccess.class);
-                    startActivity(intent);
-                    return true;
+                Log.d("image selection ok?", String.valueOf(selectedPassImages.equals(passImages)));
+                Log.d("keyImageSuccessfullySel", String.valueOf(keyImageSuccessfullySelected));
+                //everything is ok
+                if(statistics.getAuthenticationTries() <= authenticationMaxAttempts
+                        && keyImageSuccessfullySelected
+                        && selectedPassImages.equals(passImages)) {
+                    statistics.setAuthenticationResult(AuthResult.OK);
+                    Log.d("Auth Result", "OK");
                 }
-                else if(authenticationTries <= authenticationMaxAttempts
+                // key image not ok
+                else if(statistics.getAuthenticationTries() <= authenticationMaxAttempts
+                        && !keyImageSuccessfullySelected){
+                        statistics.setAuthenticationResult(AuthResult.WrongKeyImage);
+                        Log.d("Auth Result", "Wrong Key Image");
+                }
+                // pass images not ok
+                else if(statistics.getAuthenticationTries() <= authenticationMaxAttempts
+                        && keyImageSuccessfullySelected
                         && !selectedPassImages.equals(passImages)){
-                    statistics.addAuthenticationTry();
-                    Snackbar.make(gridView, "Selected wrong Pass Images!", Snackbar.LENGTH_LONG)
-                            .setAction("Action", null).show();
+                        statistics.setAuthenticationResult(AuthResult.WrongPassImages);
+                        Log.d("Auth Result", "Wrong Pass Images");
                 }
+                //too many auth tries
                 else{
-                    statistics.addAuthenticationTry(); //should be > authenticationMaxAttempts
-                    Snackbar.make(gridView, "Authentication Failure!", Snackbar.LENGTH_LONG)
-                            .setAction("Action", null).show();
+                    Log.d("Too many Auth Tries", statistics.getAuthenticationTries()+" needed");
+                    statistics.setAuthenticationResult(AuthResult.TooManyAuthTries);
                 }
-                //increase the tries
-                authenticationTries++;
-                return false;
+                statistics.addAuthenticationTry();
+                statistics.endAuthentication();
+                Intent intent = new Intent(this, authenticationSuccess.class);
+                startActivity(intent);
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -273,14 +305,20 @@ public class authenticate extends AppCompatActivity {
 
     @Override
     protected void onResume() {
-        //dbConnection.open();
+        Log.d("Auth Activity", "resume");
         super.onResume();
     }
 
     @Override
     protected void onPause() {
-        //dbConnection.close();
+        Log.d("Auth Activity", "paused");
         super.onPause();
+    }
+
+    @Override
+    protected void onStop() {
+        Log.d("Auth Activity", "stopped");
+        super.onStop();
     }
 
     private void changeImageCounterText(TextView textView){

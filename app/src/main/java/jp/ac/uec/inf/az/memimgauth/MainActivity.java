@@ -14,7 +14,6 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -112,8 +111,8 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.actions, menu);
+        //MenuInflater inflater = getMenuInflater();
+        //inflater.inflate(R.menu.actions, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -157,6 +156,11 @@ public class MainActivity extends AppCompatActivity {
                         imageList.add(clipData.getItemAt(i).getUri().toString());
                     }
                     setPassImagesForUser(imageList);
+                    if(dbConnection.getPassImagesForUser(userId).size() > 0) {
+                        Intent intent = new Intent(getApplicationContext(), showPassImages.class);
+                        intent.putExtra("userId", userId);
+                        startActivity(intent);
+                    }
                 }
                 else {
                     Snackbar.make(findViewById(R.id.activity_main), clipData.getItemCount() + " Images selected. Please select 4 Pass Images!", Snackbar.LENGTH_LONG).show();
@@ -252,14 +256,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void openAuthenticationScreen(View view, int numberOfDecoyImages){
-        if(userId > 0 && passImagesSelected) {
+        if(userId > 0 && passImagesSelected && !Uri.EMPTY.equals(dbConnection.getKeyPassImageForUser(userId))) {
             Intent intent = new Intent(getApplicationContext(), authenticate.class);
             intent.putExtra("userId", userId);
             intent.putExtra("numberOfDecoyImages", numberOfDecoyImages);
             startActivity(intent);
         }
         else{
-            Snackbar.make(view,"Please login and select Pass Images!", Snackbar.LENGTH_LONG).show();
+            Snackbar.make(view,"Please select Pass Images correctly!", Snackbar.LENGTH_LONG).show();
         }
     }
 }
