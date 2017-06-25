@@ -140,4 +140,8 @@ public class Statistics {
     public void reset(){
         ourInstance = null;
     }
+
+    public String getDateOfToday() {
+        return dateOfToday;
+    }
 }

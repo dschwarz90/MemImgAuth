@@ -54,6 +54,7 @@ public class showPassImages extends AppCompatActivity {
             imageList = dbConnection.getPassImagesForUser(userId);
             for (int i=0; i < imageList.size(); i++){
                 Image image = new Image(imageList.get(i));
+                //highlight the key pass image
                 if(selectedKeyPassImage != null && image.getImageUri().equals(selectedKeyPassImage)){
                     image.setColor(Color.RED);
                 }

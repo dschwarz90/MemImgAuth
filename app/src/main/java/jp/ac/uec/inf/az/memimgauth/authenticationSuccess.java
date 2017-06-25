@@ -16,7 +16,9 @@ import android.widget.TextView;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public class authenticationSuccess extends AppCompatActivity {
 
@@ -56,6 +58,7 @@ public class authenticationSuccess extends AppCompatActivity {
                 Intent intent = new Intent(getApplicationContext(), authenticate.class);
                 intent.putExtra("userId", statistics.getUserId());
                 intent.putExtra("numberOfDecoyImages", statistics.getNumberOfDecoyImages());
+                //todo maybe calculate the authTries
                 startActivity(intent);
             }
         });
@@ -78,7 +81,8 @@ public class authenticationSuccess extends AppCompatActivity {
     }
 
     private void processStatisticsMail(){
-        String[] recipients = {"ds313373@gmail.com", "uecazlab@gmail.com"};
+        //String[] recipients = {"uecazlab@gmail.com"};
+        String[] recipients = {"ds313373@gmail.com"};
         String message = "Please find attached the Research Data.";
         File data = null;
         Date dateVal = new Date();
@@ -86,8 +90,7 @@ public class authenticationSuccess extends AppCompatActivity {
         try {
             data = File.createTempFile(filename, ".csv", getExternalCacheDir());
             data.setReadable(true, false);
-            FileWriter out = (FileWriter) generateCsvFile(
-                    data, "Name,Data1");
+            FileWriter out = (FileWriter) generateCsvFile(data);
             sendMail(recipients, "DejaVu Data", message, data);
         } catch (IOException e) {
             e.printStackTrace();
@@ -112,23 +115,21 @@ public class authenticationSuccess extends AppCompatActivity {
 
     }
 
-    public FileWriter generateCsvFile(File sFileName,String fileContent) {
+    public FileWriter generateCsvFile(File sFileName) {
         FileWriter writer = null;
-
         try {
             writer = new FileWriter(sFileName);
-            writer.append(fileContent);
+            CSVUtils.writeLine(writer, generateAttachmentHeadline(), ',', '"');
+            CSVUtils.writeLine(writer, generateAttachmentContent());
             writer.flush();
 
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
-        }finally
-        {
+        }
+        finally {
             try {
                 writer.close();
             } catch (IOException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
         }
@@ -141,5 +142,32 @@ public class authenticationSuccess extends AppCompatActivity {
         Intent intent = new Intent(getApplicationContext(), MainActivity.class);
         intent.putExtra("userId", statistics.getUserId());
         startActivity(intent);
+    }
+
+    private List<String> generateAttachmentHeadline() {
+        List<String> content= new ArrayList<>();
+        content.add("Username");
+        content.add("dateOfExperiment");
+        content.add("neededTimeForAuthTry");
+        content.add("authenticationTries");
+        content.add("maxAuthenticationTries");
+        content.add("authResult");
+        content.add("numberOfPassImages");
+        content.add("numberOfDecoyImages");
+
+        return content;
+    }
+
+    private List<String> generateAttachmentContent(){
+        List<String> content= new ArrayList<>();
+        content.add(statistics.getUsername());
+        content.add(statistics.getDateOfToday());
+        content.add(statistics.getNeededTimeForAuthenticationProcess());
+        content.add(String.valueOf(statistics.getAuthenticationTries()));
+        content.add(String.valueOf(statistics.getMaxAuthenticationTries()));
+        content.add(statistics.getAuthenticationResult().toString());
+        content.add(String.valueOf(statistics.getNumberOfPassImages()));
+        content.add(String.valueOf(statistics.getNumberOfDecoyImages()));
+        return content;
     }
 }
