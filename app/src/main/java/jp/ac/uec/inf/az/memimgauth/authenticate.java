@@ -126,57 +126,54 @@ public class authenticate extends AppCompatActivity {
             gridAdapter = new GridViewAdapter(this, R.layout.grid_item_layout, thumbnails);
             gridView.setAdapter(gridAdapter);
             gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                int clickCounter = 0;
                 public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
-                    clickCounter++;
                     Image selectedImage = (Image) gridAdapter.getItem(position);
-                    if(clickCounter == 1
-                            && selectedImage.getImageUri().equals(dbConnection.getKeyPassImageForUser(userId))){
-                        keyImageSuccessfullySelected = true;
-                    }
-                    statistics.addEnteredPassImage(selectedImage.getImageUri());
+                    statistics.addNeededTimeForPassImageSelection();
                     selectedImage.toggleChecked();
-                    //todo max selectable should be 4
-                    if(selectedImage.isChecked()){
+                    if (selectedImage.isChecked()) {
                         selectedImagesCounter++;
+                        statistics.addEnteredPassImage(selectedImage.getImageUri());
                         //change bg color
-                        if(selectedPassImages.isEmpty()){
+                        if (selectedPassImages.isEmpty()) {
                             selectedImage.setColor(Color.RED);
-                        }
-                        else{
+                        } else {
                             selectedImage.setColor(Color.BLUE);
                         }
                         selectedPassImages.add(selectedImage.getImageUri());
-                    }
-                    else{
+                    } else {
                         selectedImagesCounter--;
-                        if(selectedPassImages.contains(selectedImage.getImageUri())){
+                        if (selectedPassImages.contains(selectedImage.getImageUri())) {
                             selectedPassImages.remove(selectedImage.getImageUri());
                         }
                         selectedImage.setColor(Color.TRANSPARENT);
                     }
+                    //check selection of first key pass image
+                    if(selectedPassImages.size() == 1
+                            && selectedImage.getImageUri().equals(dbConnection.getKeyPassImageForUser(userId))){
+                        keyImageSuccessfullySelected = true;
+                    }
                     gridAdapter.notifyDataSetChanged();
                     changeImageCounterText(textView);
+                    invalidateOptionsMenu();
                 }
             });
             ImageButton buttonUp = (ImageButton)findViewById(R.id.pageUpButton);
-
             buttonUp.setOnClickListener(new View.OnClickListener() {
-                int currentPos = 0;
                 @Override
                 public void onClick(View v) {
-                    currentPos = currentPos - 20;
-                    gridView.smoothScrollToPosition(Math.abs((currentPos)%numberOfDecoyImagesToDisplay+4));
-
+                    int pos = gridView.getFirstVisiblePosition() - 20;
+                    gridView.smoothScrollToPosition(pos);
+                    Log.d("Jump to Pos", ""+pos);
                 }
             });
+
             ImageButton buttonDown = (ImageButton)findViewById(R.id.pageDownButton);
             buttonDown.setOnClickListener(new View.OnClickListener() {
-                int currentPos = 0;
                 @Override
                 public void onClick(View v) {
-                    currentPos = currentPos + 20;
-                    gridView.smoothScrollToPosition((currentPos)%numberOfDecoyImagesToDisplay+4);
+                    int pos = gridView.getLastVisiblePosition() + 20;
+                    gridView.smoothScrollToPosition(pos);
+                    Log.d("Jump to Pos", ""+pos);
                 }
             });
         }
@@ -246,6 +243,18 @@ public class authenticate extends AppCompatActivity {
     }
 
     @Override
+    public boolean onPrepareOptionsMenu (Menu menu) {
+        if (selectedImagesCounter == 4) {
+            menu.findItem(R.id.authenticate).setEnabled(true);
+        }
+        else{
+            menu.findItem(R.id.authenticate).setEnabled(false);
+        }
+        Log.d("Enable auth menu", String.valueOf(selectedImagesCounter==4));
+        return true;
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         //int authenticationMaxAttempts = Integer.parseInt(getValueFromSharedPref("numberOfLoginAttempts"));
         int authenticationMaxAttempts = 3;
@@ -282,6 +291,7 @@ public class authenticate extends AppCompatActivity {
                     statistics.setAuthenticationResult(AuthResult.TooManyAuthTries);
                 }
                 statistics.addAuthenticationTry();
+                //end the auth try
                 statistics.endAuthentication();
                 Intent intent = new Intent(this, authenticationSuccess.class);
                 startActivity(intent);

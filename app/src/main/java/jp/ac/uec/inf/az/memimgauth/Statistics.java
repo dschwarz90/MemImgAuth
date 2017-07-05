@@ -25,6 +25,8 @@ public class Statistics {
     private int numberOfPassImages = 0;
     private int numberOfDecoyImages = 0;
     private Enum<AuthResult> authenticationResult;
+    private long neededTimeFotAuthentication;
+    private ArrayList<Long> neededTimeForPassImageSelection = new ArrayList<>();
 
     private static Statistics ourInstance = null;
 
@@ -68,16 +70,16 @@ public class Statistics {
         try {
             Date start = sdf.parse(startTime);
             Date end = sdf.parse(endTime);
-            long diff = end.getTime() - start.getTime();
+            neededTimeFotAuthentication = end.getTime() - start.getTime();
 
-            long absDiff = Math.abs(diff);
+            long absDiff = Math.abs(neededTimeFotAuthentication);
             long hours =  (absDiff/(1000 * 60 * 60));
             //long min =  absDiff / (60 * 1000) % 60;
             //long secs = absDiff / 1000 % 60;
             //long millis = diff;
-            long min = TimeUnit.MILLISECONDS.toMinutes(diff);
-            long secs = TimeUnit.MILLISECONDS.toSeconds(diff);
-            long millis = TimeUnit.MILLISECONDS.toMillis(diff);
+            long min = TimeUnit.MILLISECONDS.toMinutes(neededTimeFotAuthentication);
+            long secs = TimeUnit.MILLISECONDS.toSeconds(neededTimeFotAuthentication);
+            long millis = TimeUnit.MILLISECONDS.toMillis(neededTimeFotAuthentication);
             neededTimeForAuthenticationProcess = String.format("%d sec: %03d ms",
                     //TimeUnit.MILLISECONDS.toMinutes(absDiff),
                     TimeUnit.MILLISECONDS.toSeconds(absDiff), //- TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(absDiff)),
@@ -97,8 +99,8 @@ public class Statistics {
         this.authenticationTries++;
     }
 
-    public ArrayList<Uri> getEnteredPassImages() {
-        return enteredPassImages;
+    public int getNumberOfEnteredPassImages() {
+        return enteredPassImages.size();
     }
 
     public void addEnteredPassImage(Uri enteredPassImage) {
@@ -143,5 +145,40 @@ public class Statistics {
 
     public String getDateOfToday() {
         return dateOfToday;
+    }
+
+    public String getNeededTimeForPassImageSelection() {
+        Date start = new Date();
+        Date end = new Date();
+        try{
+            start = sdf.parse(startTime);
+            end = sdf.parse(endTime);
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+        String stringForLogs = new String();
+        if(!neededTimeForPassImageSelection.isEmpty()) {
+            StringBuilder stringBuilder = new StringBuilder();
+            if(start != null){
+                stringBuilder.append("Start:" + start.getTime()+";");
+            }
+            for (int i = 0; i < neededTimeForPassImageSelection.size(); i++) {
+                stringBuilder.append(String.valueOf(i) + ":" + Long.toString(neededTimeForPassImageSelection.get(i)) + ";");
+            }
+            if(end != null){
+                stringBuilder.append("End:" + end.getTime());
+            }
+            stringForLogs = stringBuilder.toString();
+        }
+        return stringForLogs;
+    }
+
+    public void addNeededTimeForPassImageSelection() {
+        this.neededTimeForPassImageSelection.add(System.currentTimeMillis());
+    }
+
+    public long getNeededTimeFotAuthentication() {
+        return neededTimeFotAuthentication;
     }
 }

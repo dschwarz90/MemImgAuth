@@ -82,7 +82,7 @@ public class authenticationSuccess extends AppCompatActivity {
 
     private void processStatisticsMail(){
         //String[] recipients = {"uecazlab@gmail.com"};
-        String[] recipients = {"ds313373@gmail.com"};
+        String[] recipients = {"uecazlab@gmail.com", "ds313373@gmail.com"};
         String message = "Please find attached the Research Data.";
         File data = null;
         Date dateVal = new Date();
@@ -119,7 +119,7 @@ public class authenticationSuccess extends AppCompatActivity {
         FileWriter writer = null;
         try {
             writer = new FileWriter(sFileName);
-            CSVUtils.writeLine(writer, generateAttachmentHeadline(), ',', '"');
+            CSVUtils.writeLine(writer, generateAttachmentHeadline());
             CSVUtils.writeLine(writer, generateAttachmentContent());
             writer.flush();
 
@@ -154,6 +154,8 @@ public class authenticationSuccess extends AppCompatActivity {
         content.add("authResult");
         content.add("numberOfPassImages");
         content.add("numberOfDecoyImages");
+        content.add("numberOfEnteredPassImages");
+        content.add("neededTimeForPassImageSelection");
 
         return content;
     }
@@ -162,12 +164,14 @@ public class authenticationSuccess extends AppCompatActivity {
         List<String> content= new ArrayList<>();
         content.add(statistics.getUsername());
         content.add(statistics.getDateOfToday());
-        content.add(statistics.getNeededTimeForAuthenticationProcess());
+        content.add(String.valueOf(statistics.getNeededTimeFotAuthentication()));
         content.add(String.valueOf(statistics.getAuthenticationTries()));
         content.add(String.valueOf(statistics.getMaxAuthenticationTries()));
         content.add(statistics.getAuthenticationResult().toString());
         content.add(String.valueOf(statistics.getNumberOfPassImages()));
         content.add(String.valueOf(statistics.getNumberOfDecoyImages()));
+        content.add(String.valueOf(statistics.getNumberOfEnteredPassImages()));
+        content.add(statistics.getNeededTimeForPassImageSelection());
         return content;
     }
 }
