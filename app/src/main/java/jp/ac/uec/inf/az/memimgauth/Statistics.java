@@ -5,6 +5,7 @@ import android.net.Uri;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -131,54 +132,103 @@ public class Statistics {
         this.maxAuthenticationTries = maxAuthenticationTries;
     }
 
+    /**
+     * returns the auth. result
+     * @return the auth result as enum
+     */
     public Enum<AuthResult> getAuthenticationResult() {
         return authenticationResult;
     }
 
+    /**
+     * sets the auth results
+     * @param result the auth. result (enum)
+     */
     public void setAuthenticationResult(Enum<AuthResult> result) {
         authenticationResult = result;
     }
 
+    /**
+     * reset the current auth. session (current instance = null)
+     */
     public void reset(){
         ourInstance = null;
     }
 
+    /**
+     * date of today
+     * @return returns today's date
+     */
     public String getDateOfToday() {
         return dateOfToday;
     }
 
+    /**
+     * returns a string with the needed selection time for each pass image
+     * @return concatenated string with needed selection time for each image
+     */
     public String getNeededTimeForPassImageSelection() {
-        Date start = new Date();
-        Date end = new Date();
-        try{
-            start = sdf.parse(startTime);
-            end = sdf.parse(endTime);
-        }
-        catch (Exception e){
-            e.printStackTrace();
-        }
         String stringForLogs = new String();
         if(!neededTimeForPassImageSelection.isEmpty()) {
             StringBuilder stringBuilder = new StringBuilder();
-            if(start != null){
-                stringBuilder.append("Start:" + start.getTime()+";");
+            Iterator<Long> iterator = neededTimeForPassImageSelection.iterator();
+            int index = 1;
+            //build the string
+            while (iterator.hasNext()){
+                stringBuilder.append(String.valueOf(index) + ":" + Long.toString(iterator.next()) + ";");
+                index++;
             }
-            for (int i = 0; i < neededTimeForPassImageSelection.size(); i++) {
-                stringBuilder.append(String.valueOf(i) + ":" + Long.toString(neededTimeForPassImageSelection.get(i)) + ";");
-            }
-            if(end != null){
-                stringBuilder.append("End:" + end.getTime());
-            }
+            //delete the last ";"
+            stringBuilder.deleteCharAt(stringBuilder.length()-1);
             stringForLogs = stringBuilder.toString();
         }
         return stringForLogs;
     }
 
+    /**
+     * add a timestamp for an image selection
+     */
     public void addNeededTimeForPassImageSelection() {
         this.neededTimeForPassImageSelection.add(System.currentTimeMillis());
     }
 
+    /**
+     * returns the needed time (end time - start time)
+     * @return needed time for auth.
+     */
     public long getNeededTimeFotAuthentication() {
         return neededTimeFotAuthentication;
+    }
+
+    /**
+     * start time of auth. session as long
+     * @return start time
+     */
+    public long getAuthenticationStartTime(){
+        Date start = new Date();
+        try{
+            start = sdf.parse(startTime);
+            return start.getTime();
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+        return (long) 0;
+    }
+
+    /**
+     * end time of auth. session as long
+     * @return end time
+     */
+    public long getAuthenticationEndTime(){
+        Date end = new Date();
+        try{
+            end = sdf.parse(endTime);
+            return end.getTime();
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+        return (long) 0;
     }
 }

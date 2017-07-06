@@ -126,6 +126,7 @@ public class authenticate extends AppCompatActivity {
             gridAdapter = new GridViewAdapter(this, R.layout.grid_item_layout, thumbnails);
             gridView.setAdapter(gridAdapter);
             gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                //todo only 4 items should be selectable
                 public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
                     Image selectedImage = (Image) gridAdapter.getItem(position);
                     statistics.addNeededTimeForPassImageSelection();

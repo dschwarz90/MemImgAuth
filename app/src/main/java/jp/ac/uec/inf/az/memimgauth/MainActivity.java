@@ -245,7 +245,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onResume() {
-        //dbConnection.open();
+        passImagesSelected = dbConnection.getPassImagesForUser(userId).size() > 0;
         super.onResume();
     }
 

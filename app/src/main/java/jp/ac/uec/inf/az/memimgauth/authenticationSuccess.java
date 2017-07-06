@@ -149,12 +149,14 @@ public class authenticationSuccess extends AppCompatActivity {
         content.add("Username");
         content.add("dateOfExperiment");
         content.add("neededTimeForAuthTry");
-        content.add("authenticationTries");
-        content.add("maxAuthenticationTries");
+        //content.add("authenticationTries");
+        //content.add("maxAuthenticationTries");
         content.add("authResult");
         content.add("numberOfPassImages");
         content.add("numberOfDecoyImages");
         content.add("numberOfEnteredPassImages");
+        content.add("authenticationStartTime");
+        content.add("authenticationEndTime");
         content.add("neededTimeForPassImageSelection");
 
         return content;
@@ -165,13 +167,16 @@ public class authenticationSuccess extends AppCompatActivity {
         content.add(statistics.getUsername());
         content.add(statistics.getDateOfToday());
         content.add(String.valueOf(statistics.getNeededTimeFotAuthentication()));
-        content.add(String.valueOf(statistics.getAuthenticationTries()));
-        content.add(String.valueOf(statistics.getMaxAuthenticationTries()));
+        //content.add(String.valueOf(statistics.getAuthenticationTries()));
+        //content.add(String.valueOf(statistics.getMaxAuthenticationTries()));
         content.add(statistics.getAuthenticationResult().toString());
         content.add(String.valueOf(statistics.getNumberOfPassImages()));
         content.add(String.valueOf(statistics.getNumberOfDecoyImages()));
         content.add(String.valueOf(statistics.getNumberOfEnteredPassImages()));
+        content.add(String.valueOf(statistics.getAuthenticationStartTime()));
+        content.add(String.valueOf(statistics.getAuthenticationEndTime()));
         content.add(statistics.getNeededTimeForPassImageSelection());
+
         return content;
     }
 }
