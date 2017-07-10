@@ -65,8 +65,8 @@
         app:layout_constraintLeft_toLeftOf="parent"
         tools:layout_constraintTop_creator="1"
         tools:layout_constraintRight_creator="1"
-        android:layout_marginTop="59dp"
-        app:layout_constraintTop_toBottomOf="@+id/operationTime"
+        android:layout_marginTop="150dp"
+        app:layout_constraintTop_toBottomOf="@+id/retryButton"
         tools:layout_constraintLeft_creator="1" />
 
     <Button
@@ -80,7 +80,7 @@
         tools:layout_constraintTop_creator="1"
         tools:layout_constraintRight_creator="1"
         android:layout_marginTop="26dp"
-        app:layout_constraintTop_toBottomOf="@+id/userChooserButton"
+        app:layout_constraintTop_toBottomOf="@+id/operationTime"
         tools:layout_constraintLeft_creator="1" />
 
 </android.support.constraint.ConstraintLayout>

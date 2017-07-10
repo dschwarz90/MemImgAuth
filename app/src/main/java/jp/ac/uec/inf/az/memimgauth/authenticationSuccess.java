@@ -58,10 +58,10 @@ public class authenticationSuccess extends AppCompatActivity {
                 Intent intent = new Intent(getApplicationContext(), authenticate.class);
                 intent.putExtra("userId", statistics.getUserId());
                 intent.putExtra("numberOfDecoyImages", statistics.getNumberOfDecoyImages());
-                //todo maybe calculate the authTries
                 startActivity(intent);
             }
         });
+        retryButton.setEnabled(false);
 
         Button userChooserButton = (Button) findViewById(R.id.userChooserButton);
         userChooserButton.setOnClickListener(new View.OnClickListener() {
@@ -77,7 +77,11 @@ public class authenticationSuccess extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
+        if(resultCode == RESULT_OK && requestCode == 100) {
+            //enable the retry button
+            Button retryButton = (Button) findViewById(R.id.retryButton);
+            retryButton.setEnabled(true);
+        }
     }
 
     private void processStatisticsMail(){
@@ -100,15 +104,18 @@ public class authenticationSuccess extends AppCompatActivity {
     private void sendMail(String[] recipients, String subject, String message, File attachment){
         Intent i = new Intent(Intent.ACTION_SEND);
         //i.setType("plain/text");
+        //i.setClassName("com.google.android.gm", "com.google.android.gm.ComposeActivityGmail");
         i.setType("message/rfc822");
         if(attachment.exists()) {
             i.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(attachment));
+            i.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         }
         i.putExtra(Intent.EXTRA_EMAIL, recipients);
         i.putExtra(Intent.EXTRA_SUBJECT, subject);
         i.putExtra(Intent.EXTRA_TEXT, message);
         try {
             startActivity(Intent.createChooser(i, "Send mail..."));
+            //startActivityForResult(i, 100);
         } catch (android.content.ActivityNotFoundException ex) {
             Snackbar.make(findViewById(R.id.fab), "There are no email clients installed.", Snackbar.LENGTH_LONG).show();
         }
@@ -178,5 +185,13 @@ public class authenticationSuccess extends AppCompatActivity {
         content.add(statistics.getNeededTimeForPassImageSelection());
 
         return content;
+    }
+
+    @Override
+    public void onRestart(){
+        //enable the retry button
+        Button retryButton = (Button) findViewById(R.id.retryButton);
+        retryButton.setEnabled(true);
+        super.onRestart();
     }
 }
