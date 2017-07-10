@@ -86,7 +86,7 @@ public class authenticationSuccess extends AppCompatActivity {
         String message = "Please find attached the Research Data.";
         File data = null;
         Date dateVal = new Date();
-        String filename = dateVal.toString();
+        String filename = statistics.getUsername()+"_"+dateVal.toString();
         try {
             data = File.createTempFile(filename, ".csv", getExternalCacheDir());
             data.setReadable(true, false);

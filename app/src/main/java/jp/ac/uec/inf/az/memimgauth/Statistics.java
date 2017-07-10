@@ -169,6 +169,7 @@ public class Statistics {
      */
     public String getNeededTimeForPassImageSelection() {
         String stringForLogs = new String();
+        //todo need to display correct pass images only
         if(!neededTimeForPassImageSelection.isEmpty()) {
             StringBuilder stringBuilder = new StringBuilder();
             Iterator<Long> iterator = neededTimeForPassImageSelection.iterator();

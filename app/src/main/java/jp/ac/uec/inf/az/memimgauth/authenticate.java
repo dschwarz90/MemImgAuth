@@ -129,11 +129,11 @@ public class authenticate extends AppCompatActivity {
                 //todo only 4 items should be selectable
                 public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
                     Image selectedImage = (Image) gridAdapter.getItem(position);
-                    statistics.addNeededTimeForPassImageSelection();
                     selectedImage.toggleChecked();
                     if (selectedImage.isChecked()) {
                         selectedImagesCounter++;
                         statistics.addEnteredPassImage(selectedImage.getImageUri());
+                        statistics.addNeededTimeForPassImageSelection();
                         //change bg color
                         if (selectedPassImages.isEmpty()) {
                             selectedImage.setColor(Color.RED);
