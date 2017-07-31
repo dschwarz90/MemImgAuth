@@ -144,6 +144,12 @@ public class MainActivity extends AppCompatActivity {
         startActivityForResult(intent, PICK_IMAGE);
     }
 
+    /**
+     * Handler for image selection
+     * @param requestCode
+     * @param resultCode
+     * @param data
+     */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data){
         super.onActivityResult(requestCode, resultCode, data);
@@ -176,6 +182,7 @@ public class MainActivity extends AppCompatActivity {
      * Returns the real file path for a given URI.
      * @param contentUri URI of the file
      * @return File path
+     * @deprecated
      */
     private String getRealPathFromURI(Uri contentUri) {
         String[] proj = { MediaStore.Images.Media.DATA };
@@ -193,6 +200,7 @@ public class MainActivity extends AppCompatActivity {
      * @param context
      * @param key
      * @return
+     * @deprecated
      */
     public static void setStringArrayPref(Context context, String key, ArrayList<String> values) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
@@ -209,6 +217,11 @@ public class MainActivity extends AppCompatActivity {
         editor.commit();
     }
 
+    /**
+     * set the pass images for user
+     * @param values
+     * @return
+     */
     private boolean setPassImagesForUser(ArrayList<String> values){
         JSONArray a = new JSONArray();
         for (int i = 0; i < values.size(); i++) {
@@ -222,6 +235,7 @@ public class MainActivity extends AppCompatActivity {
      * @param context
      * @param key
      * @return
+     * @deprecated
      */
     public static ArrayList<String> getStringArrayPref(Context context, String key) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
@@ -255,6 +269,11 @@ public class MainActivity extends AppCompatActivity {
         super.onPause();
     }
 
+    /**
+     * Opens the Auth. Screen
+     * @param view
+     * @param numberOfDecoyImages
+     */
     public void openAuthenticationScreen(View view, int numberOfDecoyImages){
         if(userId > 0 && passImagesSelected && !Uri.EMPTY.equals(dbConnection.getKeyPassImageForUser(userId))) {
             Intent intent = new Intent(getApplicationContext(), authenticate.class);

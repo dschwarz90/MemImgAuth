@@ -20,10 +20,18 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * Shows the Authentication Result screen
+ */
 public class authenticationSuccess extends AppCompatActivity {
 
+    //statistics instance
     Statistics statistics = Statistics.getInstance();
 
+    /**
+     * Creates the page
+     * @param savedInstanceState
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,6 +48,7 @@ public class authenticationSuccess extends AppCompatActivity {
         });
         Log.d("needed time", statistics.getNeededTimeForAuthenticationProcess());
         ImageView imageView = (ImageView)findViewById(R.id.imageView);
+        //changes to success/failed layout
         if(statistics.getAuthenticationResult() == AuthResult.OK){
             setTitle("Authentication Success!");
             imageView.setImageResource(+R.raw.success);
@@ -51,6 +60,7 @@ public class authenticationSuccess extends AppCompatActivity {
         TextView operationTime = (TextView)findViewById(R.id.operationTime);
         operationTime.setText(statistics.getNeededTimeForAuthenticationProcess());
 
+        //offer a fast way to redo the auth. trial
         Button retryButton = (Button) findViewById(R.id.retryButton);
         retryButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -63,6 +73,7 @@ public class authenticationSuccess extends AppCompatActivity {
         });
         retryButton.setEnabled(false);
 
+        //link to login screen
         Button userChooserButton = (Button) findViewById(R.id.userChooserButton);
         userChooserButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -71,9 +82,16 @@ public class authenticationSuccess extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+        //reset the statistics
         statistics.reset();
     }
 
+    /**
+     * Enables a button after the statistics mail was sent
+     * @param requestCode
+     * @param resultCode
+     * @param data
+     */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -84,16 +102,20 @@ public class authenticationSuccess extends AppCompatActivity {
         }
     }
 
+    /**
+     * Send the statistics mail
+     */
     private void processStatisticsMail(){
-        //String[] recipients = {"uecazlab@gmail.com"};
-        String[] recipients = {"uecazlab@gmail.com", "ds313373@gmail.com"};
+        String[] recipients = {"uecazlab@gmail.com"};
         String message = "Please find attached the Research Data.";
         File data = null;
         Date dateVal = new Date();
         String filename = statistics.getUsername()+"_"+dateVal.toString();
         try {
+            //create a writeable temp file
             data = File.createTempFile(filename, ".csv", getExternalCacheDir());
             data.setReadable(true, false);
+            //write the csv data
             FileWriter out = (FileWriter) generateCsvFile(data);
             sendMail(recipients, "DejaVu Data", message, data);
         } catch (IOException e) {
@@ -101,6 +123,13 @@ public class authenticationSuccess extends AppCompatActivity {
         }
     }
 
+    /**
+     * Send the email
+     * @param recipients
+     * @param subject
+     * @param message
+     * @param attachment
+     */
     private void sendMail(String[] recipients, String subject, String message, File attachment){
         Intent i = new Intent(Intent.ACTION_SEND);
         //i.setType("plain/text");
@@ -122,6 +151,11 @@ public class authenticationSuccess extends AppCompatActivity {
 
     }
 
+    /**
+     * Write content to file
+     * @param sFileName
+     * @return
+     */
     public FileWriter generateCsvFile(File sFileName) {
         FileWriter writer = null;
         try {
@@ -143,6 +177,9 @@ public class authenticationSuccess extends AppCompatActivity {
         return writer;
     }
 
+    /**
+     * After pressing the hardware Back button, link to start screen
+     */
     @Override
     public void onBackPressed() {
         super.onBackPressed();
@@ -151,6 +188,10 @@ public class authenticationSuccess extends AppCompatActivity {
         startActivity(intent);
     }
 
+    /**
+     * Generate csv headline
+     * @return headlines
+     */
     private List<String> generateAttachmentHeadline() {
         List<String> content= new ArrayList<>();
         content.add("Username");
@@ -169,6 +210,10 @@ public class authenticationSuccess extends AppCompatActivity {
         return content;
     }
 
+    /**
+     * Generate csv content
+     * @return csv content
+     */
     private List<String> generateAttachmentContent(){
         List<String> content= new ArrayList<>();
         content.add(statistics.getUsername());
@@ -187,6 +232,9 @@ public class authenticationSuccess extends AppCompatActivity {
         return content;
     }
 
+    /**
+     * enable the retry button after activity restart
+     */
     @Override
     public void onRestart(){
         //enable the retry button

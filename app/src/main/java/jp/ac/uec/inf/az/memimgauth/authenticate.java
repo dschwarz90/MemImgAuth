@@ -48,6 +48,10 @@ public class authenticate extends AppCompatActivity {
     private int selectedImagesCounter = 0;
     private boolean keyImageSuccessfullySelected = false;
 
+    /**
+     * Handler for an authentication trial
+     * @param savedInstanceState
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -118,11 +122,13 @@ public class authenticate extends AppCompatActivity {
             }
             timings.addSplit("prepare the view");
             final User user = dbConnection.getUserForId(userId);
+            //process the statistics
             statistics.setUsername(user.getName());
             statistics.setUserId(user.getId());
             statistics.setNumberOfDecoyImages(numberOfDecoyImagesToDisplay);
             statistics.setNumberOfPassImages(numberOfPassImagesToDisplay);
             statistics.startAuthentication();
+            //set the image grid content
             gridAdapter = new GridViewAdapter(this, R.layout.grid_item_layout, thumbnails);
             gridView.setAdapter(gridAdapter);
             gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {

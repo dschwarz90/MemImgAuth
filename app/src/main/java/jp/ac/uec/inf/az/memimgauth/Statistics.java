@@ -31,6 +31,10 @@ public class Statistics {
 
     private static Statistics ourInstance = null;
 
+    /**
+     * The instance of statistics (singleton)
+     * @return instance of statistics
+     */
     public static synchronized Statistics getInstance() {
         if(ourInstance == null) {
             ourInstance = new Statistics();
@@ -66,6 +70,9 @@ public class Statistics {
         startTime = sdf.format(new Date());
     }
 
+    /**
+     * calculates the operation time
+     */
     public void endAuthentication(){
         endTime = sdf.format(new Date());
         try {
